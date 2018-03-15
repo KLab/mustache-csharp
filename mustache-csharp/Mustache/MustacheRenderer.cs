@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Text;
 using Mustache.Extension;
@@ -42,23 +41,22 @@ namespace Mustache
                     var next = string.Empty;
                     switch (token.Type)
                     {
-                        case "#":
+                        case TokenType.SectionOpen:
                             next = rnd.RenderSection(token, ctx, subRender(i, token.Children), orginalTemplate);
                             break;
-                        case "^":
+                        case TokenType.InvertedSectionOpen:
                             next = rnd.RenderInverted(token.Value, ctx, subRender(i, token.Children));
                             break;
-                        case ">":
+                        case TokenType.Partial:
                             next = rnd.RenderPartial(token.Value, ctx, orginalTemplate);
                             break;
-                        case "name":
+                        case TokenType.Variable:
                             next = rnd.RenderName(token.Value, ctx, true);
                             break;
-                        case "{":
-                        case "&":
+                        case TokenType.UnescapedVariable:
                             next = rnd.RenderName(token.Value, ctx, false);
                             break;
-                        case "text":
+                        case TokenType.Text:
                             next = token.Value;
                             break;
                     }

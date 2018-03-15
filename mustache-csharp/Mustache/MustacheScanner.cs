@@ -5,67 +5,98 @@ namespace Mustache
 {
     public class MustacheScanner
     {
-        public string String { get; private set; }
-        public string Tail { get; private set; }
+        public string Source { get; private set; }
+
         public int Pos { get; private set; }
 
-        public MustacheScanner()
+        public string Tail
         {
-            String = null;
-            Tail = null;
-            Pos = 0;
+            get
+            {
+                return (Pos < Source.Length) ? Source.Substring(Pos) : string.Empty;
+            }
         }
 
         public MustacheScanner(string str)
         {
-            String = str;
-            Tail = str;
+            Source = str;
             Pos = 0;
         }
 
         public bool Eos()
         {
-            return string.IsNullOrEmpty(Tail);
+            return Source.Length <= Pos;
         }
 
-        public string Scan(string pattern)
+        public char Peek()
         {
-            var re = new Regex(pattern); // TODO: reuse regex.
-            var match = re.Match(Tail);
-
-            if (match.Success && match.Index == 0)
+            if (Eos())
             {
-                Tail = Tail.Substring(match.Length);
-                Pos += match.Length;
-                return match.Value;
+                return (char)0;
             }
-
-            return null;
+            return Source[Pos];
         }
 
-        public string ScanUntil(string pattern)
+        public void Seek(int offset)
         {
-            var skipped = string.Empty;
-            var re = new Regex(pattern); // TODO: reuse regex.
-            var match = re.Match(Tail);
+            Pos += offset;
+        }
 
-            if (match.Success)
+        public int DiscardWhiteSpaces()
+        {
+            int read = 0;
+            for (; Pos < Source.Length; ++Pos)
             {
-                if (0 < match.Index)
+                if (!Char.IsWhiteSpace(Source[Pos]))
                 {
-                    skipped = Tail.Substring(0, match.Index);
-                    Tail = Tail.Substring(match.Index); // TODO: reduce string allocation.
-                    Pos += skipped.Length;
+                    break;
+                }
+                read++;
+            }
+            return read;
+        }
+
+        public string ReadUntilJustBefore(string pattern)
+        {
+            var prev = Pos;
+            for (; Pos < Source.Length; ++Pos)
+            {
+                if (StartsWith(pattern))
+                {
+                    break;
                 }
             }
-            else
-            {
-                skipped = Tail;
-                Pos += Tail.Length;
-                Tail = string.Empty;
-            }
 
-            return skipped;
+            if (prev == Pos)
+            {
+                return string.Empty;
+            }
+            return Source.Substring(prev, Pos - prev);
+        }
+
+        public int SeekUntilJustBefore(string pattern)
+        {
+            var prev = Pos;
+            for (; Pos < Source.Length; ++Pos)
+            {
+                if (StartsWith(pattern))
+                {
+                    break;
+                }
+            }
+            return Pos - prev;
+        }
+
+        public bool StartsWith(string pattern)
+        {
+            for (int i = 0; i < pattern.Length; ++i)
+            {
+                if (Source.Length <= Pos + i || Source[Pos + i] != pattern[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

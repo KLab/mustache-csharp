@@ -1,16 +1,19 @@
 using System;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace Mustache
 {
-    static class Patterns
+    public enum TokenType
     {
-        public static readonly string White = @"\s*";
-        public static readonly string Space = @"\s+";
-        public static readonly string Equal = @"\s*=";
-        public static readonly string Curly = @"\s*}";
-        public static readonly string Tag = @"[#\\^/>{&=!]";
+        Text,
+        Variable,
+        SectionOpen,
+        SectionClose,
+        InvertedSectionOpen,
+        UnescapedVariable,
+        Comment,
+        Partial,
+        DelimiterChange
     }
 
     public class Token
@@ -18,19 +21,29 @@ namespace Mustache
         public int StartIndex;
         public int EndIndex;
         public int ClosingTagIndex;
-        public string Type;
+        public TokenType Type;
         public string Value;
         public List<Token> Children;
     }
+
     public class MustacheParser
     {
         public static readonly string[] DefaultTags = { "{{", "}}" };
-        string[] EscapeTags(string[] tags)
+
+        public TokenType TokenInfo(char c)
         {
-            return new string[] {
-                Regex.Escape(tags[0]) + @"\s*",
-                @"\s*" + Regex.Escape(tags[1]),
-            };
+            switch (c)
+            {
+                case '>': return TokenType.Partial;
+                case '^': return TokenType.InvertedSectionOpen;
+                case '/': return TokenType.SectionClose;
+                case '&':
+                case '{': return TokenType.UnescapedVariable;
+                case '#': return TokenType.SectionOpen;
+                case '!': return TokenType.Comment;
+                case '=': return TokenType.DelimiterChange;
+                default: return TokenType.Variable;
+            }
         }
         List<Token> SquashTokens(List<Token> tokens)
         {
@@ -45,7 +58,7 @@ namespace Mustache
                 {
                     res.Add(new Token
                     {
-                        Type = "text",
+                        Type = TokenType.Text,
                         Value = string.Join("", txt),
                         StartIndex = txtStartIndex,
                         EndIndex = txtEndIndex
@@ -56,7 +69,7 @@ namespace Mustache
 
             foreach (var token in tokens)
             {
-                if (token.Type == "text")
+                if (token.Type == TokenType.Text)
                 {
                     if (txt.Count == 0)
                     {
@@ -84,18 +97,18 @@ namespace Mustache
 
             foreach (var token in tokens)
             {
-                if (token.Type == "#" || token.Type == "^")
+                if (token.Type == TokenType.SectionOpen || token.Type == TokenType.InvertedSectionOpen)
                 {
                     token.Children = new List<Token>();
                     sections.Add(token);
                     collector.Add(token);
                     collector = token.Children;
                 }
-                else if (token.Type == "/")
+                else if (token.Type == TokenType.SectionClose)
                 {
                     if (sections.Count == 0)
                     {
-                        // TODO: goo Exception
+                        // TODO: be better Exception
                         throw new Exception("Unopened section: " + token.Value);
                     }
 
@@ -104,7 +117,7 @@ namespace Mustache
 
                     if (section.Value != token.Value)
                     {
-                        // TODO: goo Exception
+                        // TODO: be better Exception
                         throw new Exception("Unclosed section: " + section.Value);
                     }
 
@@ -127,7 +140,7 @@ namespace Mustache
 
             if (0 < sections.Count)
             {
-                // TODO: goo Exception
+                // TODO: be better Exception
                 var section = sections[sections.Count - 1];
                 throw new Exception("Unclosed section: " + section.Value);
             }
@@ -141,7 +154,6 @@ namespace Mustache
                 tags = DefaultTags;
             }
 
-            var tagPatterns = EscapeTags(tags);
             var scanner = new MustacheScanner(template);
             var tokens = new List<Token>();
             var spaces = new List<int>();
@@ -163,27 +175,16 @@ namespace Mustache
                 nonSpace = false;
             };
 
-            string type = string.Empty;
-            string value = string.Empty;
-            string chr = string.Empty;
-
             while (!scanner.Eos())
             {
                 var start = scanner.Pos;
-                value = scanner.ScanUntil(tagPatterns[0]);
-
-                var spaceRe = new Regex(Patterns.Space);
+                var value = scanner.ReadUntilJustBefore(tags[0]);
 
                 if (value != null)
                 {
                     for (int i = 0; i < value.Length; i++)
                     {
-                        // FIXME: TOOOOO Slow
-
-                        chr = value.Substring(i, 1);
-                        var spaceMatch = spaceRe.Match(chr);
-
-                        if (spaceMatch.Success)
+                        if (Char.IsWhiteSpace(value[i]))
                         {
                             spaces.Add(tokens.Count);
                         }
@@ -194,76 +195,76 @@ namespace Mustache
 
                         tokens.Add(new Token
                         {
-                            Type = "text",
-                            Value = chr,
+                            Type = TokenType.Text,
+                            Value = value[i].ToString(),
                             StartIndex = start,
                             EndIndex = start,
                         });
                         start++;
 
-                        if (chr == "\n")
+                        if (value[i] == '\n')
                         {
                             stripSpace();
                         }
                     }
                 }
 
-                if (string.IsNullOrEmpty(scanner.Scan(tagPatterns[0])))
+                if (!scanner.StartsWith(tags[0]))
                 {
                     break;
                 }
 
+                scanner.Seek(tags[0].Length); // discard right mustache
+
                 hasTag = true;
-                type = scanner.Scan(Patterns.Tag);
+                var tokenChar = scanner.Peek();
+                var tokenType = TokenInfo(tokenChar);
 
-                if (string.IsNullOrEmpty(type))
+                if (tokenType != TokenType.Variable)
                 {
-                    type = "name";
+                    scanner.Seek(1);
                 }
 
-                scanner.Scan(Patterns.White);
-
-                if (type == "=")
+                if (tokenType == TokenType.DelimiterChange)
                 {
-                    value = scanner.ScanUntil(Patterns.Equal);
-                    scanner.Scan(Patterns.Equal);
-                    scanner.ScanUntil(tagPatterns[1]);
+                    value = scanner.ReadUntilJustBefore("=");
+                    scanner.Seek(1); // discard left '='
+                    scanner.SeekUntilJustBefore(tags[1]);
                 }
-                else if (type == "{")
+                else if (tokenType == TokenType.UnescapedVariable && tokenChar == '{')
                 {
-                    var closePattern = @"\s*}" + Regex.Escape(tags[1]);
-                    value = scanner.ScanUntil(closePattern);
-                    scanner.Scan(Patterns.Curly);
-                    scanner.ScanUntil(tagPatterns[1]);
+                    value = scanner.ReadUntilJustBefore("}" + tags[1]);
+                    scanner.Seek(1); // discard '}'
                 }
                 else
                 {
-                    value = scanner.ScanUntil(tagPatterns[1]);
+                    value = scanner.ReadUntilJustBefore(tags[1]);
                 }
 
-                if (string.IsNullOrEmpty(scanner.Scan(tagPatterns[1])))
+                if (!scanner.StartsWith(tags[1]))
                 {
-                    // TODO good exception type
+                    // TODO: be better exception
                     throw new Exception("Unclosed tag at " + scanner.Pos);
                 }
 
+                scanner.Seek(tags[1].Length); // discard left mustache
+
                 tokens.Add(new Token
                 {
-                    Type = type,
-                    Value = value,
+                    Type = tokenType,
+                    Value = value.Trim(),
                     StartIndex = start,
                     EndIndex = scanner.Pos - 1,
                 });
 
-                if (type == "name" || type == "{" || type == "&")
+                if (tokenType == TokenType.Variable || tokenType == TokenType.UnescapedVariable)
                 {
                     nonSpace = true; // --> what does this do?
                 }
 
-                if (type == "=")
+                if (tokenType == TokenType.DelimiterChange)
                 {
                     tags = value.Split(null as string[], StringSplitOptions.RemoveEmptyEntries);
-                    tagPatterns = EscapeTags(tags);
                 }
             }
 
