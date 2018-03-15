@@ -24,7 +24,7 @@ namespace Mustache
             Cache = new Dictionary<string, object>();
         }
 
-        public object Lookup (string name)
+        public object Lookup(string name)
         {
             if (Cache.ContainsKey(name))
             {
@@ -46,14 +46,14 @@ namespace Mustache
             {
                 var ctx = this;
 
-                while(ctx != null)
+                while (ctx != null)
                 {
                     if (0 < name.IndexOf('.'))
                     {
                         var names = name.Split(new char[] { '.' });
                         value = ctx.View;
 
-                        foreach(var s in names)
+                        foreach (var s in names)
                         {
                             var v = value.GetValue(s);
                             if (v != null)

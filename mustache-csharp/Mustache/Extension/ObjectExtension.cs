@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Mustache.Extension
 {
-	public static class ObjectExtension
-	{
-		public static object GetFieldValue(this object self, string name)
-		{
+    public static class ObjectExtension
+    {
+        public static object GetFieldValue(this object self, string name)
+        {
             var f = self.GetType().GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             return (f == null) ? null : f.GetValue(self);
-		}
+        }
 
         public static object GetPropertyValue(this object self, string name)
         {
@@ -65,14 +65,15 @@ namespace Mustache.Extension
                 return !(self as IEnumerable).GetEnumerator().MoveNext();
             }
 
-            if (self.ToString() == "{ }") {
+            if (self.ToString() == "{ }")
+            {
                 // FIXME {
                 return true;
             }
 
             return false;
         }
-	}
+    }
 
 
 
