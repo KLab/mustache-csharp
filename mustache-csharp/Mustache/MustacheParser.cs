@@ -214,7 +214,7 @@ namespace Mustache
                     break;
                 }
 
-                scanner.Seek(tags[0].Length); // discard right mustache
+                scanner.Seek(tags[0].Length); // discard begin tag
 
                 hasTag = true;
                 var tokenChar = scanner.Peek();
@@ -222,13 +222,13 @@ namespace Mustache
 
                 if (tokenType != TokenType.Variable)
                 {
-                    scanner.Seek(1);
+                    scanner.Seek(1); // discard token type character
                 }
 
                 if (tokenType == TokenType.DelimiterChange)
                 {
                     value = scanner.ReadUntilJustBefore("=");
-                    scanner.Seek(1); // discard left '='
+                    scanner.Seek(1); // discard '='
                     scanner.SeekUntilJustBefore(tags[1]);
                 }
                 else if (tokenType == TokenType.UnescapedVariable && tokenChar == '{')
@@ -247,12 +247,12 @@ namespace Mustache
                     throw new Exception("Unclosed tag at " + scanner.Pos);
                 }
 
-                scanner.Seek(tags[1].Length); // discard left mustache
+                scanner.Seek(tags[1].Length); // discard end tag
 
                 tokens.Add(new Token
                 {
                     Type = tokenType,
-                    Value = value.Trim(),
+                    Value = value.Trim(), // trim to use it as key string
                     StartIndex = start,
                     EndIndex = scanner.Pos - 1,
                 });
