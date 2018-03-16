@@ -8,14 +8,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 output = os.path.join(script_dir, "Spec.cs")
 
 ignore_test_cases = (
-    "TestInvertedStandaloneWithoutNewline",
-    "TestCommentsStandaloneWithoutNewline",
-    "TestDelimitersStandaloneWithoutNewline",
-    "TestPartialsStandaloneWithoutPreviousLine",
-    "TestPartialsStandaloneWithoutNewline",
-    "TestPartialsStandaloneIndentation",
-    "TestSectionsStandaloneWithoutNewline",
-
     # lambda tests
     "TestLambdaLambdasInterpolation",
     "TestLambdaLambdasInterpolationExpansion",

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Mustache.Extension;
 
 namespace Mustache
@@ -19,14 +20,14 @@ namespace Mustache
             PartialCache = new Dictionary<string, Func<MustacheContext, string>>();
         }
 
-        Func<MustacheContext, MustacheRenderer, string> CompileTokens(List<Token> tokens, string orginalTemplate)
+        Func<MustacheContext, MustacheRenderer, string> CompileTokens(List<Token> tokens)
         {
             var subs = new Dictionary<int, Func<MustacheContext, MustacheRenderer, string>>();
             Func<int, List<Token>, Func<MustacheContext, MustacheRenderer, string>> subRender = (subIndex, subTokens) =>
             {
                 if (!subs.ContainsKey(subIndex))
                 {
-                    subs[subIndex] = CompileTokens(subTokens, orginalTemplate);
+                    subs[subIndex] = CompileTokens(subTokens);
                 }
                 return subs[subIndex];
             };
@@ -42,13 +43,13 @@ namespace Mustache
                     switch (token.Type)
                     {
                         case TokenType.SectionOpen:
-                            next = rnd.RenderSection(token, ctx, subRender(i, token.Children), orginalTemplate);
+                            next = rnd.RenderSection(token, ctx, subRender(i, token.Children));
                             break;
                         case TokenType.InvertedSectionOpen:
                             next = rnd.RenderInverted(token.Value, ctx, subRender(i, token.Children));
                             break;
                         case TokenType.Partial:
-                            next = rnd.RenderPartial(token.Value, ctx, orginalTemplate);
+                            next = rnd.RenderPartial(token.Value, ctx, token.PartialIndent);
                             break;
                         case TokenType.Variable:
                             next = rnd.RenderName(token.Value, ctx, true);
@@ -67,15 +68,15 @@ namespace Mustache
             };
         }
 
-        Func<MustacheContext, string> Compile(string template, string[] tags, string orginalTemplate)
+        Func<MustacheContext, string> Compile(string template, string[] tags)
         {
             var tokens = new MustacheParser().Parse(template, tags);
-            return Compile(tokens, orginalTemplate);
+            return Compile(tokens);
         }
 
-        Func<MustacheContext, string> Compile(List<Token> tokens, string orginalTemplate)
+        Func<MustacheContext, string> Compile(List<Token> tokens)
         {
-            var fn = CompileTokens(tokens, orginalTemplate);
+            var fn = CompileTokens(tokens);
 
             return (c) =>
             {
@@ -97,13 +98,13 @@ namespace Mustache
 
             if (!Cache.ContainsKey(template))
             {
-                Cache[template] = Compile(template, null, template);
+                Cache[template] = Compile(template, null);
             }
 
             return Cache[template](new MustacheContext(view, null));
         }
 
-        string RenderSection(Token token, MustacheContext ctx, Func<MustacheContext, MustacheRenderer, string> callback, string orgnalTemplate)
+        string RenderSection(Token token, MustacheContext ctx, Func<MustacheContext, MustacheRenderer, string> callback)
         {
             var value = ctx.Lookup(token.Value);
 
@@ -138,9 +139,10 @@ namespace Mustache
             return string.Empty;
         }
 
-        string RenderPartial(string name, MustacheContext ctx, string orgTemplate)
+        string RenderPartial(string name, MustacheContext ctx, string indent)
         {
-            var fn = PartialCache.GetValueOrDefault(name);
+            var key = name + "#" + indent;
+            var fn = PartialCache.GetValueOrDefault(key);
 
             if (fn == null && Partials != null)
             {
@@ -150,8 +152,27 @@ namespace Mustache
                     return string.Empty;
                 }
 
-                fn = Compile(partial, null, orgTemplate);
-                PartialCache[name] = fn;
+                if (string.IsNullOrEmpty(indent))
+                {
+                    fn = Compile(partial, null);
+                }
+                else
+                {
+                    // FIXME: dirty
+                    var replaced = string.Empty;
+                    if (partial[partial.Length - 1] != '\n')
+                    {
+                        replaced = Regex.Replace(partial, @"^", indent, RegexOptions.Multiline);
+                    }
+                    else
+                    {
+                        var s = partial.Substring(0, partial.Length - 1);
+                        replaced = Regex.Replace(s, @"^", indent, RegexOptions.Multiline) + "\n";
+                    }
+                    fn = Compile(replaced, null);
+                }
+
+                PartialCache[key] = fn;
             }
 
             if (fn == null)

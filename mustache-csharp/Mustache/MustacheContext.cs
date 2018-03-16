@@ -12,8 +12,6 @@ namespace Mustache
 
         public MustacheContext()
         {
-            View = null;
-            Parent = null;
             Cache = new Dictionary<string, object>();
         }
 

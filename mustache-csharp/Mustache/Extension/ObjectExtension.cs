@@ -67,7 +67,7 @@ namespace Mustache.Extension
 
             if (self.ToString() == "{ }")
             {
-                // FIXME {
+                // FIXME:{ < how to detect anonymous empty value more smartly. 
                 return true;
             }
 

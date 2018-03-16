@@ -1703,7 +1703,7 @@ public static void RunAllTests() {
 	TestCommentsIndentedStandalone();
 	TestCommentsStandaloneLineEndings();
 	TestCommentsStandaloneWithoutPreviousLine();
-//	TestCommentsStandaloneWithoutNewline();
+	TestCommentsStandaloneWithoutNewline();
 	TestCommentsMultilineStandalone();
 	TestCommentsIndentedMultilineStandalone();
 	TestCommentsIndentedInline();
@@ -1720,7 +1720,7 @@ public static void RunAllTests() {
 	TestDelimitersIndentedStandaloneTag();
 	TestDelimitersStandaloneLineEndings();
 	TestDelimitersStandaloneWithoutPreviousLine();
-//	TestDelimitersStandaloneWithoutNewline();
+	TestDelimitersStandaloneWithoutNewline();
 	TestDelimitersPairWithPadding();
 	TestInterpolationNoInterpolation();
 	TestInterpolationBasicInterpolation();
@@ -1771,7 +1771,7 @@ public static void RunAllTests() {
 	TestInvertedStandaloneIndentedLines();
 	TestInvertedStandaloneLineEndings();
 	TestInvertedStandaloneWithoutPreviousLine();
-//	TestInvertedStandaloneWithoutNewline();
+	TestInvertedStandaloneWithoutNewline();
 	TestInvertedPadding();
 	TestPartialsBasicBehavior();
 	TestPartialsFailedLookup();
@@ -1780,9 +1780,9 @@ public static void RunAllTests() {
 	TestPartialsSurroundingWhitespace();
 	TestPartialsInlineIndentation();
 	TestPartialsStandaloneLineEndings();
-//	TestPartialsStandaloneWithoutPreviousLine();
-//	TestPartialsStandaloneWithoutNewline();
-//	TestPartialsStandaloneIndentation();
+	TestPartialsStandaloneWithoutPreviousLine();
+	TestPartialsStandaloneWithoutNewline();
+	TestPartialsStandaloneIndentation();
 	TestPartialsPaddingWhitespace();
 	TestSectionsTruthy();
 	TestSectionsFalsey();
@@ -1808,7 +1808,7 @@ public static void RunAllTests() {
 	TestSectionsIndentedStandaloneLines();
 	TestSectionsStandaloneLineEndings();
 	TestSectionsStandaloneWithoutPreviousLine();
-//	TestSectionsStandaloneWithoutNewline();
+	TestSectionsStandaloneWithoutNewline();
 	TestSectionsPadding();
 //	TestLambdaLambdasInterpolation();
 //	TestLambdaLambdasInterpolationExpansion();

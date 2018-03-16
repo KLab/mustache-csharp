@@ -23,23 +23,30 @@ namespace Mustache
             Pos = 0;
         }
 
-        public bool Eos()
+        public char Peek(int offset)
         {
-            return Source.Length <= Pos;
+            var p = Pos + offset;
+            if (0 <= p && p < Source.Length)
+            {
+                return Source[p];
+            }
+            return (char)0;
         }
 
         public char Peek()
         {
-            if (Eos())
-            {
-                return (char)0;
-            }
-            return Source[Pos];
+            return Peek(0);
         }
 
-        public void Seek(int offset)
+        public bool Seek(int offset)
         {
-            Pos += offset;
+            var p = Pos + offset;
+            if (0 <= p && p < Source.Length)
+            {
+                Pos += offset;
+                return true;
+            }
+            return false;
         }
 
         public int DiscardWhiteSpaces()
