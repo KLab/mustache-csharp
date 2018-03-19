@@ -13,12 +13,9 @@ namespace Mustache
         public Dictionary<string, List<Token>> Cache { get; private set; }
         public Dictionary<string, string> Partials { get; private set; }
 
-        public Delimiter CurrentDelimiter { get; private set; }
-
         public MustacheRenderer()
         {
             Cache = new Dictionary<string, List<Token>>();
-            CurrentDelimiter = Delimiter.Default();
         }
 
         public string Render(string template, object view, Dictionary<string, string> partials)
@@ -35,9 +32,7 @@ namespace Mustache
 
             if (!Cache.ContainsKey(template))
             {
-                var parsed = new MustacheParser().Parse(template, Delimiter.Default());
-                CurrentDelimiter = parsed.Item2;
-                Cache[template] = parsed.Item1;
+                Cache[template] = new MustacheParser().Parse(template, Delimiter.Default());
             }
 
             return RenderTokens(new MustacheContext(view, null), Cache[template]);
@@ -94,8 +89,7 @@ namespace Mustache
                     {
                         // When Lambdas are used as the data value for Section tag,
                         // the returned value MUST be rendered against the current delimiters.
-                        var parsed = new MustacheParser().Parse(template, CurrentDelimiter);
-                        Cache[template] = parsed.Item1;
+                        Cache[template] = new MustacheParser().Parse(template, token.CurrentDelimiter);
                     }
                     return RenderTokens(ctx, Cache[template]);
                 }
@@ -140,14 +134,13 @@ namespace Mustache
                 return string.Empty;
             }
 
-            var key = "#partial" + name + "#" + indent;
+            var key = "# partial #" + name + "#" + indent;
 
             if (!Cache.ContainsKey(key))
             {
                 if (string.IsNullOrEmpty(indent))
                 {
-                    var parsed = new MustacheParser().Parse(partial, Delimiter.Default());
-                    Cache[key] = parsed.Item1;
+                    Cache[key] = new MustacheParser().Parse(partial, Delimiter.Default());
                 }
                 else
                 {
@@ -162,9 +155,7 @@ namespace Mustache
                         var s = partial.Substring(0, partial.Length - 1);
                         replaced = Regex.Replace(s, @"^", indent, RegexOptions.Multiline) + "\n";
                     }
-
-                    var parsed = new MustacheParser().Parse(replaced, Delimiter.Default());
-                    Cache[key] = parsed.Item1;
+                    Cache[key] = new MustacheParser().Parse(replaced, Delimiter.Default());
                 }
             }
 
@@ -182,9 +173,9 @@ namespace Mustache
 
             if (value.IsLambda())
             {
-                var tpl = value.InvokeNameLambda() as string;
-                var parsed = new MustacheParser().Parse(tpl, Delimiter.Default());
-                value = RenderTokens(ctx, parsed.Item1);
+                var template = value.InvokeNameLambda() as string;
+                var tokens = new MustacheParser().Parse(template, Delimiter.Default());
+                value = RenderTokens(ctx, tokens);
             }
 
             if (value.IsFalsey())

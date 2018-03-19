@@ -41,6 +41,7 @@ namespace Mustache
         public int TextLength;
         public int SectionStartIndex;
         public int SectionEndIndex;
+        public Delimiter CurrentDelimiter;
 
         public string Text
         {
@@ -220,7 +221,7 @@ namespace Mustache
             return root;
         }
 
-        public Tuple<List<Token>, Delimiter> Parse(string template, Delimiter delimiter)
+        public List<Token> Parse(string template, Delimiter delimiter)
         {
             var scanner = new MustacheScanner(template);
             var tokens = new List<Token>();
@@ -238,6 +239,7 @@ namespace Mustache
                         TextStartIndex = start,
                         TextLength = end - start,
                         IsBol = start == lastBol,
+                        CurrentDelimiter = delimiter,
                     });
                 }
             };
@@ -303,6 +305,7 @@ namespace Mustache
                         Name = value.Trim(), // trim to use it as key string
                         StartIndex = start,
                         IsBol = start == lastBol,
+                        CurrentDelimiter = delimiter,
                     };
 
                     start = scanner.Pos + delimiter.Close.Length;
@@ -314,8 +317,7 @@ namespace Mustache
                     if (tokenType == TokenType.DelimiterChange)
                     {
                         var sp = value.Split(null as string[], StringSplitOptions.RemoveEmptyEntries);
-                        delimiter.Open = sp[0];
-                        delimiter.Close = sp[1];
+                        delimiter = new Delimiter { Open = sp[0], Close = sp[1] };
                     }
                 }
                 else
@@ -327,8 +329,7 @@ namespace Mustache
             pushText(scanner.Pos + 1);
 
             SquashTokens(ref tokens);
-            tokens = NestTokens(tokens);
-            return Tuple.Create(tokens, delimiter);
+            return NestTokens(tokens);
         }
 
     }
