@@ -10,16 +10,14 @@ namespace Mustache
 {
     public class MustacheRenderer
     {
-        public Dictionary<string, Func<MustacheContext, string>> Cache { get; private set; }
-        public Dictionary<string, Func<MustacheContext, string>> PartialCache { get; private set; }
+        public Dictionary<string, List<Token>> Cache { get; private set; }
         public Dictionary<string, string> Partials { get; private set; }
 
         public Delimiter CurrentDelimiter { get; private set; }
 
         public MustacheRenderer()
         {
-            Cache = new Dictionary<string, Func<MustacheContext, string>>();
-            PartialCache = new Dictionary<string, Func<MustacheContext, string>>();
+            Cache = new Dictionary<string, List<Token>>();
             CurrentDelimiter = Delimiter.Default();
         }
 
@@ -37,91 +35,48 @@ namespace Mustache
 
             if (!Cache.ContainsKey(template))
             {
-                Cache[template] = Compile(template);
+                var parsed = new MustacheParser().Parse(template, Delimiter.Default());
+                CurrentDelimiter = parsed.Item2;
+                Cache[template] = parsed.Item1;
             }
 
-            return Cache[template](new MustacheContext(view, null));
+            return RenderTokens(new MustacheContext(view, null), Cache[template]);
         }
 
-        Func<MustacheContext, MustacheRenderer, string> CompileTokens(List<Token> tokens)
+
+        string RenderTokens(MustacheContext ctx, List<Token> tokens)
         {
-            var subs = new Dictionary<int, Func<MustacheContext, MustacheRenderer, string>>();
-            Func<int, List<Token>, Func<MustacheContext, MustacheRenderer, string>> subRender = (subIndex, subTokens) =>
+            var builder = new StringBuilder();
+
+            foreach (var token in tokens)
             {
-                if (!subs.ContainsKey(subIndex))
+                switch (token.Type)
                 {
-                    subs[subIndex] = CompileTokens(subTokens);
+                    case TokenType.SectionOpen:
+                        builder.Append(RenderSection(token, ctx));
+
+                        break;
+                    case TokenType.InvertedSectionOpen:
+                        builder.Append(RenderInverted(token, ctx));
+                        break;
+                    case TokenType.Partial:
+                        builder.Append(RenderPartial(token.Name, ctx, token.PartialIndent));
+                        break;
+                    case TokenType.Variable:
+                        builder.Append(RenderName(token.Name, ctx, true));
+                        break;
+                    case TokenType.UnescapedVariable:
+                        builder.Append(RenderName(token.Name, ctx, false));
+                        break;
+                    case TokenType.Text:
+                        builder.Append(token.Template, token.TextStartIndex, token.TextLength);
+                        break;
                 }
-                return subs[subIndex];
-            };
+            }
 
-            return (ctx, rnd) =>
-            {
-                var builder = new StringBuilder();
-
-                for (int i = 0; i < tokens.Count; ++i)
-                {
-                    var token = tokens[i];
-                    var next = string.Empty;
-
-                    switch (token.Type)
-                    {
-                        case TokenType.SectionOpen:
-                            next = rnd.RenderSection(token, ctx, subRender(i, token.Children));
-                            builder.Append(next);
-                            break;
-                        case TokenType.InvertedSectionOpen:
-                            next = rnd.RenderInverted(token.Name, ctx, subRender(i, token.Children));
-                            builder.Append(next);
-                            break;
-                        case TokenType.Partial:
-                            next = rnd.RenderPartial(token.Name, ctx, token.PartialIndent);
-                            builder.Append(next);
-                            break;
-                        case TokenType.Variable:
-                            next = rnd.RenderName(token.Name, ctx, true);
-                            builder.Append(next);
-                            break;
-                        case TokenType.UnescapedVariable:
-                            next = rnd.RenderName(token.Name, ctx, false);
-                            builder.Append(next);
-                            break;
-                        case TokenType.Text:
-                            builder.Append(token.Template, token.TextStartIndex, token.TextLength);
-                            break;
-                    }
-                }
-
-                return builder.ToString();
-            };
+            return builder.ToString();
         }
-
-        // When Lambdas are used as the data value for Section tag, 
-        // the returned value MUST be rendered against the current delimiters.
-        Func<MustacheContext, string> CompileAgainstCurrentDelimiter(string template)
-        {
-            var parsed = new MustacheParser().Parse(template, CurrentDelimiter);
-            return Compile(parsed.Item1);
-        }
-
-        Func<MustacheContext, string> Compile(string template)
-        {
-            var parsed = new MustacheParser().Parse(template, Delimiter.Default());
-            CurrentDelimiter = parsed.Item2;
-            return Compile(parsed.Item1);
-        }
-
-        Func<MustacheContext, string> Compile(List<Token> tokens)
-        {
-            var fn = CompileTokens(tokens);
-
-            return (c) =>
-            {
-                return fn(c, this);
-            };
-        }
-
-        string RenderSection(Token token, MustacheContext ctx, Func<MustacheContext, MustacheRenderer, string> callback)
+        string RenderSection(Token token, MustacheContext ctx)
         {
             var value = ctx.Lookup(token.Name);
 
@@ -135,8 +90,14 @@ namespace Mustache
                 var template = value.InvokeSectionLambda(token.SectionTemplate) as string;
                 if (!string.IsNullOrEmpty(template))
                 {
-                    var fn = CompileAgainstCurrentDelimiter(template);
-                    return fn(ctx);
+                    if (!Cache.ContainsKey(template))
+                    {
+                        // When Lambdas are used as the data value for Section tag,
+                        // the returned value MUST be rendered against the current delimiters.
+                        var parsed = new MustacheParser().Parse(template, CurrentDelimiter);
+                        Cache[template] = parsed.Item1;
+                    }
+                    return RenderTokens(ctx, Cache[template]);
                 }
             }
 
@@ -145,22 +106,22 @@ namespace Mustache
                 var sb = new StringBuilder();
                 foreach (object item in value as ICollection)
                 {
-                    sb.Append(callback(new MustacheContext(item, ctx), this));
+                    sb.Append(RenderTokens(new MustacheContext(item, ctx), token.Children));
                 }
                 return sb.ToString();
             }
 
-            return callback(new MustacheContext(value, ctx), this);
+            return RenderTokens(new MustacheContext(value, ctx), token.Children);
         }
 
 
-        string RenderInverted(string name, MustacheContext ctx, Func<MustacheContext, MustacheRenderer, string> callback)
+        string RenderInverted(Token token, MustacheContext ctx)
         {
-            var value = ctx.Lookup(name);
+            var value = ctx.Lookup(token.Name);
 
             if (value.IsFalsey())
             {
-                return callback(ctx, this);
+                return RenderTokens(ctx, token.Children);
             }
 
             return string.Empty;
@@ -168,20 +129,25 @@ namespace Mustache
 
         string RenderPartial(string name, MustacheContext ctx, string indent)
         {
-            var key = name + "#" + indent;
-            var fn = PartialCache.GetValueOrDefault(key);
-
-            if (fn == null && Partials != null)
+            if (Partials == null)
             {
-                var partial = Partials.GetValueOrDefault(name);
-                if (partial == null)
-                {
-                    return string.Empty;
-                }
+                return string.Empty;
+            }
 
+            var partial = Partials.GetValueOrDefault(name);
+            if (partial == null)
+            {
+                return string.Empty;
+            }
+
+            var key = "#partial" + name + "#" + indent;
+
+            if (!Cache.ContainsKey(key))
+            {
                 if (string.IsNullOrEmpty(indent))
                 {
-                    fn = Compile(partial);
+                    var parsed = new MustacheParser().Parse(partial, Delimiter.Default());
+                    Cache[key] = parsed.Item1;
                 }
                 else
                 {
@@ -196,18 +162,13 @@ namespace Mustache
                         var s = partial.Substring(0, partial.Length - 1);
                         replaced = Regex.Replace(s, @"^", indent, RegexOptions.Multiline) + "\n";
                     }
-                    fn = Compile(replaced);
+
+                    var parsed = new MustacheParser().Parse(replaced, Delimiter.Default());
+                    Cache[key] = parsed.Item1;
                 }
-
-                PartialCache[key] = fn;
             }
 
-            if (fn == null)
-            {
-                return string.Empty;
-            }
-
-            return fn(ctx);
+            return RenderTokens(ctx, Cache[key]);
         }
 
         string RenderName(string name, MustacheContext ctx, bool escape)
@@ -222,7 +183,8 @@ namespace Mustache
             if (value.IsLambda())
             {
                 var tpl = value.InvokeNameLambda() as string;
-                value = Compile(tpl)(ctx);
+                var parsed = new MustacheParser().Parse(tpl, Delimiter.Default());
+                value = RenderTokens(ctx, parsed.Item1);
             }
 
             if (value.IsFalsey())
