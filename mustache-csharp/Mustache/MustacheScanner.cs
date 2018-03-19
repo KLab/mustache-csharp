@@ -3,19 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace Mustache
 {
-    public class MustacheScanner
+    class MustacheScanner
     {
         public string Source { get; private set; }
 
         public int Pos { get; private set; }
-
-        public string Tail
-        {
-            get
-            {
-                return (Pos < Source.Length) ? Source.Substring(Pos) : string.Empty;
-            }
-        }
 
         public MustacheScanner(string str)
         {
@@ -47,20 +39,6 @@ namespace Mustache
                 return true;
             }
             return false;
-        }
-
-        public int DiscardWhiteSpaces()
-        {
-            int read = 0;
-            for (; Pos < Source.Length; ++Pos)
-            {
-                if (!Char.IsWhiteSpace(Source[Pos]))
-                {
-                    break;
-                }
-                read++;
-            }
-            return read;
         }
 
         public string ReadUntilJustBefore(string pattern)

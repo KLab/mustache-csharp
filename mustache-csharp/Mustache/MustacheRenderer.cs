@@ -23,6 +23,26 @@ namespace Mustache
             CurrentDelimiter = Delimiter.Default();
         }
 
+        public string Render(string template, object view, Dictionary<string, string> partials)
+        {
+            if (partials != null)
+            {
+                Partials = partials;
+            }
+
+            if (string.IsNullOrEmpty(template))
+            {
+                return string.Empty;
+            }
+
+            if (!Cache.ContainsKey(template))
+            {
+                Cache[template] = Compile(template);
+            }
+
+            return Cache[template](new MustacheContext(view, null));
+        }
+
         Func<MustacheContext, MustacheRenderer, string> CompileTokens(List<Token> tokens)
         {
             var subs = new Dictionary<int, Func<MustacheContext, MustacheRenderer, string>>();
@@ -43,28 +63,33 @@ namespace Mustache
                 {
                     var token = tokens[i];
                     var next = string.Empty;
+
                     switch (token.Type)
                     {
                         case TokenType.SectionOpen:
                             next = rnd.RenderSection(token, ctx, subRender(i, token.Children));
+                            builder.Append(next);
                             break;
                         case TokenType.InvertedSectionOpen:
-                            next = rnd.RenderInverted(token.Value, ctx, subRender(i, token.Children));
+                            next = rnd.RenderInverted(token.Name, ctx, subRender(i, token.Children));
+                            builder.Append(next);
                             break;
                         case TokenType.Partial:
-                            next = rnd.RenderPartial(token.Value, ctx, token.PartialIndent);
+                            next = rnd.RenderPartial(token.Name, ctx, token.PartialIndent);
+                            builder.Append(next);
                             break;
                         case TokenType.Variable:
-                            next = rnd.RenderName(token.Value, ctx, true);
+                            next = rnd.RenderName(token.Name, ctx, true);
+                            builder.Append(next);
                             break;
                         case TokenType.UnescapedVariable:
-                            next = rnd.RenderName(token.Value, ctx, false);
+                            next = rnd.RenderName(token.Name, ctx, false);
+                            builder.Append(next);
                             break;
                         case TokenType.Text:
-                            next = token.Value;
+                            builder.Append(token.Template, token.TextStartIndex, token.TextLength);
                             break;
                     }
-                    builder.Append(next);
                 }
 
                 return builder.ToString();
@@ -96,29 +121,9 @@ namespace Mustache
             };
         }
 
-        public string Render(string template, object view, Dictionary<string, string> partials)
-        {
-            if (partials != null)
-            {
-                Partials = partials;
-            }
-
-            if (string.IsNullOrEmpty(template))
-            {
-                return string.Empty;
-            }
-
-            if (!Cache.ContainsKey(template))
-            {
-                Cache[template] = Compile(template);
-            }
-
-            return Cache[template](new MustacheContext(view, null));
-        }
-
         string RenderSection(Token token, MustacheContext ctx, Func<MustacheContext, MustacheRenderer, string> callback)
         {
-            var value = ctx.Lookup(token.Value);
+            var value = ctx.Lookup(token.Name);
 
             if (value.IsFalsey())
             {

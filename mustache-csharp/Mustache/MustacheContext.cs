@@ -10,11 +10,6 @@ namespace Mustache
         public MustacheContext Parent;
         public Dictionary<string, object> Cache;
 
-        public MustacheContext()
-        {
-            Cache = new Dictionary<string, object>();
-        }
-
         public MustacheContext(object view, MustacheContext parent)
         {
             View = view;
@@ -46,7 +41,7 @@ namespace Mustache
 
                 while (ctx != null)
                 {
-                    if (0 < name.IndexOf('.'))
+                    if (name.Contains("."))
                     {
                         var names = name.Split(new char[] { '.' });
                         value = ctx.View;

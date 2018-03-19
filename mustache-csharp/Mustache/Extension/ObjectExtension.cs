@@ -57,42 +57,14 @@ namespace Mustache.Extension
 
         public static bool IsFalsey(this object self)
         {
-            if (self == null)
-            {
-                return true;
-            }
-
-            if (self is int || self is long || self is float || self is double)
-            {
-                return false;
-            }
-
-            if (self is bool)
-            {
-                return !(bool)self;
-            }
-
-            if (self is string)
-            {
-                return (self as string).Length == 0;
-            }
-
-            if (self is ICollection)
-            {
-                return (self as ICollection).Count == 0;
-            }
-
-            if (self is IEnumerable)
-            {
-                return !(self as IEnumerable).GetEnumerator().MoveNext();
-            }
-
-            if (self.ToString() == "{ }")
-            {
-                // FIXME:{ < how to detect anonymous empty value more smartly. 
-                return true;
-            }
-
+            if (self == null) return true;
+            if (self is int || self is long || self is float || self is double) return false;
+            if (self is bool) return !(bool)self;
+            if (self is string) return (self as string).Length == 0;
+            if (self is ICollection) return (self as ICollection).Count == 0;
+            if (self is IEnumerable) return !(self as IEnumerable).GetEnumerator().MoveNext();
+            // FIXME:{ < how to detect anonymous empty value more smartly. 
+            if (self.ToString() == "{ }") return true;
             return false;
         }
     }
