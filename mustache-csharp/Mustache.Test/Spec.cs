@@ -633,6 +633,16 @@ public static void TestInterpolationDottedNamesInitialResolution() {
 		throw new Exception(@"The first part of a dotted name should resolve as any other name.");
 	}
 }
+public static void TestInterpolationDottedNamesContextPrecedence() { 
+	object data = new {a = new {b = new {}, }, b = new {c = @"ERROR", }, };
+	System.Collections.Generic.Dictionary<string, string> partials = null;
+	var template = @"{{#a}}{{b.c}}{{/a}}";
+	var expected = @"";
+	var actual = new MustacheRenderer().Render(template, data, partials);
+	if (expected != actual) { 
+		throw new Exception(@"Dotted names should be resolved against former resolutions.");
+	}
+}
 public static void TestInterpolationInterpolationSurroundingWhitespace() { 
 	object data = new {string_ = @"---", };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
@@ -1595,7 +1605,7 @@ unprocessed section contents).  The returned value MUST be rendered against
 the current delimiters, then interpolated in place of the section.
 */
 public static void TestLambdaLambdasInterpolation() { 
-	object data = new {lambda = new {php = @"return ""world"";", clojure = @"(fn [] ""world"")", __tag__ = @"code", perl = @"sub { ""world"" }", python = @"lambda: ""world""", ruby = @"proc { ""world"" }", js = @"function() { return ""world"" }", }, };
+	object data = new {lambda = (Func<string>) (() => "world"), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"Hello, {{lambda}}!";
 	var expected = @"Hello, world!";
@@ -1605,7 +1615,7 @@ public static void TestLambdaLambdasInterpolation() {
 	}
 }
 public static void TestLambdaLambdasInterpolationExpansion() { 
-	object data = new {planet = @"world", lambda = new {php = @"return ""{{planet}}"";", clojure = @"(fn [] ""{{planet}}"")", __tag__ = @"code", perl = @"sub { ""{{planet}}"" }", python = @"lambda: ""{{planet}}""", ruby = @"proc { ""{{planet}}"" }", js = @"function() { return ""{{planet}}"" }", }, };
+	object data = new {planet = @"world", lambda = (Func<string>) (() => "{{planet}}"), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"Hello, {{lambda}}!";
 	var expected = @"Hello, world!";
@@ -1615,7 +1625,7 @@ public static void TestLambdaLambdasInterpolationExpansion() {
 	}
 }
 public static void TestLambdaLambdasInterpolationAlternateDelimiters() { 
-	object data = new {planet = @"world", lambda = new {php = @"return ""|planet| => {{planet}}"";", clojure = @"(fn [] ""|planet| => {{planet}}"")", __tag__ = @"code", perl = @"sub { ""|planet| => {{planet}}"" }", python = @"lambda: ""|planet| => {{planet}}""", ruby = @"proc { ""|planet| => {{planet}}"" }", js = @"function() { return ""|planet| => {{planet}}"" }", }, };
+	object data = new {planet = @"world", lambda = (Func<string>) (() => "|planet| => {{planet}}"), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"{{= | | =}}
 Hello, (|&lambda|)!";
@@ -1626,7 +1636,8 @@ Hello, (|&lambda|)!";
 	}
 }
 public static void TestLambdaLambdasInterpolationMultipleCalls() { 
-	object data = new {lambda = new {php = @"global $calls; return ++$calls;", clojure = @"(def g (atom 0)) (fn [] (swap! g inc))", __tag__ = @"code", perl = @"sub { no strict; $calls += 1 }", python = @"lambda: globals().update(calls=globals().get(""calls"",0)+1) or calls", ruby = @"proc { $calls ||= 0; $calls += 1 }", js = @"function() { return (g=(function(){return this})()).calls=(g.calls||0)+1 }", }, };
+	int calls = 0;
+	object data = new {lambda = (Func<string>) (() => { calls++; return calls.ToString(); }), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"{{lambda}} == {{{lambda}}} == {{lambda}}";
 	var expected = @"1 == 2 == 3";
@@ -1636,7 +1647,7 @@ public static void TestLambdaLambdasInterpolationMultipleCalls() {
 	}
 }
 public static void TestLambdaLambdasEscaping() { 
-	object data = new {lambda = new {php = @"return "">"";", clojure = @"(fn [] "">"")", __tag__ = @"code", perl = @"sub { "">"" }", python = @"lambda: "">""", ruby = @"proc { "">"" }", js = @"function() { return "">"" }", }, };
+	object data = new {lambda = (Func<string>) (() => ">"), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"<{{lambda}}{{{lambda}}}";
 	var expected = @"<&gt;>";
@@ -1646,7 +1657,7 @@ public static void TestLambdaLambdasEscaping() {
 	}
 }
 public static void TestLambdaLambdasSection() { 
-	object data = new {x = @"Error!", lambda = new {php = @"return ($text == ""{{x}}"") ? ""yes"" : ""no"";", clojure = @"(fn [text] (if (= text ""{{x}}"") ""yes"" ""no""))", __tag__ = @"code", perl = @"sub { $_[0] eq ""{{x}}"" ? ""yes"" : ""no"" }", python = @"lambda text: text == ""{{x}}"" and ""yes"" or ""no""", ruby = @"proc { |text| text == ""{{x}}"" ? ""yes"" : ""no"" }", js = @"function(txt) { return (txt == ""{{x}}"" ? ""yes"" : ""no"") }", }, };
+	object data = new {x = @"Error!", lambda = (Func<string, string>) (s => (s == "{{x}}") ? "yes" : "no"), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"<{{#lambda}}{{x}}{{/lambda}}>";
 	var expected = @"<yes>";
@@ -1656,7 +1667,7 @@ public static void TestLambdaLambdasSection() {
 	}
 }
 public static void TestLambdaLambdasSectionExpansion() { 
-	object data = new {planet = @"Earth", lambda = new {php = @"return $text . ""{{planet}}"" . $text;", clojure = @"(fn [text] (str text ""{{planet}}"" text))", __tag__ = @"code", perl = @"sub { $_[0] . ""{{planet}}"" . $_[0] }", python = @"lambda text: ""%s{{planet}}%s"" % (text, text)", ruby = @"proc { |text| ""#{text}{{planet}}#{text}"" }", js = @"function(txt) { return txt + ""{{planet}}"" + txt }", }, };
+	object data = new {planet = @"Earth", lambda = (Func<string, string>) (txt => txt + "{{planet}}" + txt), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"<{{#lambda}}-{{/lambda}}>";
 	var expected = @"<-Earth->";
@@ -1666,7 +1677,7 @@ public static void TestLambdaLambdasSectionExpansion() {
 	}
 }
 public static void TestLambdaLambdasSectionAlternateDelimiters() { 
-	object data = new {planet = @"Earth", lambda = new {php = @"return $text . ""{{planet}} => |planet|"" . $text;", clojure = @"(fn [text] (str text ""{{planet}} => |planet|"" text))", __tag__ = @"code", perl = @"sub { $_[0] . ""{{planet}} => |planet|"" . $_[0] }", python = @"lambda text: ""%s{{planet}} => |planet|%s"" % (text, text)", ruby = @"proc { |text| ""#{text}{{planet}} => |planet|#{text}"" }", js = @"function(txt) { return txt + ""{{planet}} => |planet|"" + txt }", }, };
+	object data = new {planet = @"Earth", lambda = (Func<string, string>) (txt => txt + "{{planet}} => |planet|" + txt), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"{{= | | =}}<|#lambda|-|/lambda|>";
 	var expected = @"<-{{planet}} => Earth->";
@@ -1676,7 +1687,7 @@ public static void TestLambdaLambdasSectionAlternateDelimiters() {
 	}
 }
 public static void TestLambdaLambdasSectionMultipleCalls() { 
-	object data = new {lambda = new {php = @"return ""__"" . $text . ""__"";", clojure = @"(fn [text] (str ""__"" text ""__""))", __tag__ = @"code", perl = @"sub { ""__"" . $_[0] . ""__"" }", python = @"lambda text: ""__%s__"" % (text)", ruby = @"proc { |text| ""__#{text}__"" }", js = @"function(txt) { return ""__"" + txt + ""__"" }", }, };
+	object data = new {lambda = (Func<string, string>) (txt => "__" + txt + "__"), };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"{{#lambda}}FILE{{/lambda}} != {{#lambda}}LINE{{/lambda}}";
 	var expected = @"__FILE__ != __LINE__";
@@ -1686,7 +1697,7 @@ public static void TestLambdaLambdasSectionMultipleCalls() {
 	}
 }
 public static void TestLambdaLambdasInvertedSection() { 
-	object data = new {lambda = new {php = @"return false;", clojure = @"(fn [text] false)", __tag__ = @"code", perl = @"sub { 0 }", python = @"lambda text: 0", ruby = @"proc { |text| false }", js = @"function(txt) { return false }", }, static_ = @"static", };
+	object data = new {lambda = (Func<string, bool>) (txt => false), static_ = @"static", };
 	System.Collections.Generic.Dictionary<string, string> partials = null;
 	var template = @"<{{^lambda}}{{static}}{{/lambda}}>";
 	var expected = @"<>";
@@ -1743,6 +1754,7 @@ public static void RunAllTests() {
 	TestInterpolationDottedNamesBrokenChains();
 	TestInterpolationDottedNamesBrokenChainResolution();
 	TestInterpolationDottedNamesInitialResolution();
+	TestInterpolationDottedNamesContextPrecedence();
 	TestInterpolationInterpolationSurroundingWhitespace();
 	TestInterpolationTripleMustacheSurroundingWhitespace();
 	TestInterpolationAmpersandSurroundingWhitespace();
@@ -1810,16 +1822,16 @@ public static void RunAllTests() {
 	TestSectionsStandaloneWithoutPreviousLine();
 	TestSectionsStandaloneWithoutNewline();
 	TestSectionsPadding();
-//	TestLambdaLambdasInterpolation();
-//	TestLambdaLambdasInterpolationExpansion();
-//	TestLambdaLambdasInterpolationAlternateDelimiters();
-//	TestLambdaLambdasInterpolationMultipleCalls();
-//	TestLambdaLambdasEscaping();
-//	TestLambdaLambdasSection();
-//	TestLambdaLambdasSectionExpansion();
-//	TestLambdaLambdasSectionAlternateDelimiters();
-//	TestLambdaLambdasSectionMultipleCalls();
-//	TestLambdaLambdasInvertedSection();
+	TestLambdaLambdasInterpolation();
+	TestLambdaLambdasInterpolationExpansion();
+	TestLambdaLambdasInterpolationAlternateDelimiters();
+	TestLambdaLambdasInterpolationMultipleCalls();
+	TestLambdaLambdasEscaping();
+	TestLambdaLambdasSection();
+	TestLambdaLambdasSectionExpansion();
+	TestLambdaLambdasSectionAlternateDelimiters();
+	TestLambdaLambdasSectionMultipleCalls();
+	TestLambdaLambdasInvertedSection();
 }
 } // class
 } // namespace
