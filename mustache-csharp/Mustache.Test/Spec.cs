@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Mustache;
 
 namespace Mustache.Test {
@@ -16,7 +17,7 @@ Comment tags SHOULD be treated as standalone when appropriate.
 */
 public static void TestCommentsInline() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"12345{{! Comment Block! }}67890";
 	var expected = @"1234567890";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -26,7 +27,7 @@ public static void TestCommentsInline() {
 }
 public static void TestCommentsMultiline() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"12345{{!
   This is a
   multi-line comment...
@@ -41,7 +42,7 @@ public static void TestCommentsMultiline() {
 }
 public static void TestCommentsStandalone() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Begin.
 {{! Comment Block! }}
 End.
@@ -56,7 +57,7 @@ End.
 }
 public static void TestCommentsIndentedStandalone() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Begin.
   {{! Indented Comment Block! }}
 End.
@@ -71,7 +72,7 @@ End.
 }
 public static void TestCommentsStandaloneLineEndings() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|
 {{! Standalone Comment }}
 |";
@@ -84,7 +85,7 @@ public static void TestCommentsStandaloneLineEndings() {
 }
 public static void TestCommentsStandaloneWithoutPreviousLine() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  {{! I'm Still Standalone }}
 !";
 	var expected = @"!";
@@ -95,7 +96,7 @@ public static void TestCommentsStandaloneWithoutPreviousLine() {
 }
 public static void TestCommentsStandaloneWithoutNewline() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"!
   {{! I'm Still Standalone }}";
 	var expected = @"!
@@ -107,7 +108,7 @@ public static void TestCommentsStandaloneWithoutNewline() {
 }
 public static void TestCommentsMultilineStandalone() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Begin.
 {{!
 Something's going on here...
@@ -124,7 +125,7 @@ End.
 }
 public static void TestCommentsIndentedMultilineStandalone() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Begin.
   {{!
     Something's going on here...
@@ -141,7 +142,7 @@ End.
 }
 public static void TestCommentsIndentedInline() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  12 {{! 34 }}
 ";
 	var expected = @"  12 
@@ -153,7 +154,7 @@ public static void TestCommentsIndentedInline() {
 }
 public static void TestCommentsSurroundingWhitespace() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"12345 {{! Comment Block! }} 67890";
 	var expected = @"12345  67890";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -176,7 +177,7 @@ Set Delimiter tags SHOULD be treated as standalone when appropriate.
 */
 public static void TestDelimitersPairBehavior() { 
 	object data = new {text = @"Hey!", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{=<% %>=}}(<%text%>)";
 	var expected = @"(Hey!)";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -186,7 +187,7 @@ public static void TestDelimitersPairBehavior() {
 }
 public static void TestDelimitersSpecialCharacters() { 
 	object data = new {text = @"It worked!", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"({{=[ ]=}}[text])";
 	var expected = @"(It worked!)";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -196,7 +197,7 @@ public static void TestDelimitersSpecialCharacters() {
 }
 public static void TestDelimitersSections() { 
 	object data = new {section = true, data = @"I got interpolated.", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"[
 {{#section}}
   {{data}}
@@ -225,7 +226,7 @@ public static void TestDelimitersSections() {
 }
 public static void TestDelimitersInvertedSections() { 
 	object data = new {section = false, data = @"I got interpolated.", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"[
 {{^section}}
   {{data}}
@@ -254,7 +255,7 @@ public static void TestDelimitersInvertedSections() {
 }
 public static void TestDelimitersPartialInheritence() { 
 	object data = new {value = @"yes", };
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"include", @".{{value}}."},
 	};
 	var template = @"[ {{>include}} ]
@@ -271,7 +272,7 @@ public static void TestDelimitersPartialInheritence() {
 }
 public static void TestDelimitersPostPartialBehavior() { 
 	object data = new {value = @"yes", };
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"include", @".{{value}}. {{= | | =}} .|value|."},
 	};
 	var template = @"[ {{>include}} ]
@@ -287,7 +288,7 @@ public static void TestDelimitersPostPartialBehavior() {
 }
 public static void TestDelimitersSurroundingWhitespace() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| {{=@ @=}} |";
 	var expected = @"|  |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -297,7 +298,7 @@ public static void TestDelimitersSurroundingWhitespace() {
 }
 public static void TestDelimitersOutlyingWhitespaceInline() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @" | {{=@ @=}}
 ";
 	var expected = @" | 
@@ -309,7 +310,7 @@ public static void TestDelimitersOutlyingWhitespaceInline() {
 }
 public static void TestDelimitersStandaloneTag() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Begin.
 {{=@ @=}}
 End.
@@ -324,7 +325,7 @@ End.
 }
 public static void TestDelimitersIndentedStandaloneTag() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Begin.
   {{=@ @=}}
 End.
@@ -339,7 +340,7 @@ End.
 }
 public static void TestDelimitersStandaloneLineEndings() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|
 {{= @ @ =}}
 |";
@@ -352,7 +353,7 @@ public static void TestDelimitersStandaloneLineEndings() {
 }
 public static void TestDelimitersStandaloneWithoutPreviousLine() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  {{=@ @=}}
 =";
 	var expected = @"=";
@@ -363,7 +364,7 @@ public static void TestDelimitersStandaloneWithoutPreviousLine() {
 }
 public static void TestDelimitersStandaloneWithoutNewline() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"=
   {{=@ @=}}";
 	var expected = @"=
@@ -375,7 +376,7 @@ public static void TestDelimitersStandaloneWithoutNewline() {
 }
 public static void TestDelimitersPairWithPadding() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|{{= @   @ =}}|";
 	var expected = @"||";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -415,7 +416,7 @@ The Interpolation tags MUST NOT be treated as standalone.
 */
 public static void TestInterpolationNoInterpolation() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Hello from {Mustache}!
 ";
 	var expected = @"Hello from {Mustache}!
@@ -427,7 +428,7 @@ public static void TestInterpolationNoInterpolation() {
 }
 public static void TestInterpolationBasicInterpolation() { 
 	object data = new {subject = @"world", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Hello, {{subject}}!
 ";
 	var expected = @"Hello, world!
@@ -439,7 +440,7 @@ public static void TestInterpolationBasicInterpolation() {
 }
 public static void TestInterpolationHtmlEscaping() { 
 	object data = new {forbidden = @"& "" < >", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"These characters should be HTML escaped: {{forbidden}}
 ";
 	var expected = @"These characters should be HTML escaped: &amp; &quot; &lt; &gt;
@@ -451,7 +452,7 @@ public static void TestInterpolationHtmlEscaping() {
 }
 public static void TestInterpolationTripleMustache() { 
 	object data = new {forbidden = @"& "" < >", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"These characters should not be HTML escaped: {{{forbidden}}}
 ";
 	var expected = @"These characters should not be HTML escaped: & "" < >
@@ -463,7 +464,7 @@ public static void TestInterpolationTripleMustache() {
 }
 public static void TestInterpolationAmpersand() { 
 	object data = new {forbidden = @"& "" < >", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"These characters should not be HTML escaped: {{&forbidden}}
 ";
 	var expected = @"These characters should not be HTML escaped: & "" < >
@@ -475,7 +476,7 @@ public static void TestInterpolationAmpersand() {
 }
 public static void TestInterpolationBasicIntegerInterpolation() { 
 	object data = new {mph = 85, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{mph}} miles an hour!""";
 	var expected = @"""85 miles an hour!""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -485,7 +486,7 @@ public static void TestInterpolationBasicIntegerInterpolation() {
 }
 public static void TestInterpolationTripleMustacheIntegerInterpolation() { 
 	object data = new {mph = 85, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{{mph}}} miles an hour!""";
 	var expected = @"""85 miles an hour!""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -495,7 +496,7 @@ public static void TestInterpolationTripleMustacheIntegerInterpolation() {
 }
 public static void TestInterpolationAmpersandIntegerInterpolation() { 
 	object data = new {mph = 85, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{&mph}} miles an hour!""";
 	var expected = @"""85 miles an hour!""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -505,7 +506,7 @@ public static void TestInterpolationAmpersandIntegerInterpolation() {
 }
 public static void TestInterpolationBasicDecimalInterpolation() { 
 	object data = new {power = 1.21, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{power}} jiggawatts!""";
 	var expected = @"""1.21 jiggawatts!""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -515,7 +516,7 @@ public static void TestInterpolationBasicDecimalInterpolation() {
 }
 public static void TestInterpolationTripleMustacheDecimalInterpolation() { 
 	object data = new {power = 1.21, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{{power}}} jiggawatts!""";
 	var expected = @"""1.21 jiggawatts!""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -525,7 +526,7 @@ public static void TestInterpolationTripleMustacheDecimalInterpolation() {
 }
 public static void TestInterpolationAmpersandDecimalInterpolation() { 
 	object data = new {power = 1.21, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{&power}} jiggawatts!""";
 	var expected = @"""1.21 jiggawatts!""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -535,7 +536,7 @@ public static void TestInterpolationAmpersandDecimalInterpolation() {
 }
 public static void TestInterpolationBasicContextMissInterpolation() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"I ({{cannot}}) be seen!";
 	var expected = @"I () be seen!";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -545,7 +546,7 @@ public static void TestInterpolationBasicContextMissInterpolation() {
 }
 public static void TestInterpolationTripleMustacheContextMissInterpolation() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"I ({{{cannot}}}) be seen!";
 	var expected = @"I () be seen!";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -555,7 +556,7 @@ public static void TestInterpolationTripleMustacheContextMissInterpolation() {
 }
 public static void TestInterpolationAmpersandContextMissInterpolation() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"I ({{&cannot}}) be seen!";
 	var expected = @"I () be seen!";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -565,7 +566,7 @@ public static void TestInterpolationAmpersandContextMissInterpolation() {
 }
 public static void TestInterpolationDottedNamesBasicInterpolation() { 
 	object data = new {person = new {name = @"Joe", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{person.name}}"" == ""{{#person}}{{name}}{{/person}}""";
 	var expected = @"""Joe"" == ""Joe""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -575,7 +576,7 @@ public static void TestInterpolationDottedNamesBasicInterpolation() {
 }
 public static void TestInterpolationDottedNamesTripleMustacheInterpolation() { 
 	object data = new {person = new {name = @"Joe", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{{person.name}}}"" == ""{{#person}}{{{name}}}{{/person}}""";
 	var expected = @"""Joe"" == ""Joe""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -585,7 +586,7 @@ public static void TestInterpolationDottedNamesTripleMustacheInterpolation() {
 }
 public static void TestInterpolationDottedNamesAmpersandInterpolation() { 
 	object data = new {person = new {name = @"Joe", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{&person.name}}"" == ""{{#person}}{{&name}}{{/person}}""";
 	var expected = @"""Joe"" == ""Joe""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -595,7 +596,7 @@ public static void TestInterpolationDottedNamesAmpersandInterpolation() {
 }
 public static void TestInterpolationDottedNamesArbitraryDepth() { 
 	object data = new {a = new {b = new {c = new {d = new {e = new {name = @"Phil", }, }, }, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{a.b.c.d.e.name}}"" == ""Phil""";
 	var expected = @"""Phil"" == ""Phil""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -605,7 +606,7 @@ public static void TestInterpolationDottedNamesArbitraryDepth() {
 }
 public static void TestInterpolationDottedNamesBrokenChains() { 
 	object data = new {a = new {}, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{a.b.c}}"" == """"";
 	var expected = @""""" == """"";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -615,7 +616,7 @@ public static void TestInterpolationDottedNamesBrokenChains() {
 }
 public static void TestInterpolationDottedNamesBrokenChainResolution() { 
 	object data = new {a = new {b = new {}, }, c = new {name = @"Jim", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{a.b.c.name}}"" == """"";
 	var expected = @""""" == """"";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -625,7 +626,7 @@ public static void TestInterpolationDottedNamesBrokenChainResolution() {
 }
 public static void TestInterpolationDottedNamesInitialResolution() { 
 	object data = new {a = new {b = new {c = new {d = new {e = new {name = @"Phil", }, }, }, }, }, b = new {c = new {d = new {e = new {name = @"Wrong", }, }, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#a}}{{b.c.d.e.name}}{{/a}}"" == ""Phil""";
 	var expected = @"""Phil"" == ""Phil""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -633,19 +634,9 @@ public static void TestInterpolationDottedNamesInitialResolution() {
 		throw new Exception(@"The first part of a dotted name should resolve as any other name.");
 	}
 }
-public static void TestInterpolationDottedNamesContextPrecedence() { 
-	object data = new {a = new {b = new {}, }, b = new {c = @"ERROR", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
-	var template = @"{{#a}}{{b.c}}{{/a}}";
-	var expected = @"";
-	var actual = new MustacheRenderer().Render(template, data, partials);
-	if (expected != actual) { 
-		throw new Exception(@"Dotted names should be resolved against former resolutions.");
-	}
-}
 public static void TestInterpolationInterpolationSurroundingWhitespace() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| {{string_}} |";
 	var expected = @"| --- |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -655,7 +646,7 @@ public static void TestInterpolationInterpolationSurroundingWhitespace() {
 }
 public static void TestInterpolationTripleMustacheSurroundingWhitespace() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| {{{string_}}} |";
 	var expected = @"| --- |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -665,7 +656,7 @@ public static void TestInterpolationTripleMustacheSurroundingWhitespace() {
 }
 public static void TestInterpolationAmpersandSurroundingWhitespace() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| {{&string_}} |";
 	var expected = @"| --- |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -675,7 +666,7 @@ public static void TestInterpolationAmpersandSurroundingWhitespace() {
 }
 public static void TestInterpolationInterpolationStandalone() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  {{string_}}
 ";
 	var expected = @"  ---
@@ -687,7 +678,7 @@ public static void TestInterpolationInterpolationStandalone() {
 }
 public static void TestInterpolationTripleMustacheStandalone() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  {{{string_}}}
 ";
 	var expected = @"  ---
@@ -699,7 +690,7 @@ public static void TestInterpolationTripleMustacheStandalone() {
 }
 public static void TestInterpolationAmpersandStandalone() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  {{&string_}}
 ";
 	var expected = @"  ---
@@ -711,7 +702,7 @@ public static void TestInterpolationAmpersandStandalone() {
 }
 public static void TestInterpolationInterpolationWithPadding() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|{{ string_ }}|";
 	var expected = @"|---|";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -721,7 +712,7 @@ public static void TestInterpolationInterpolationWithPadding() {
 }
 public static void TestInterpolationTripleMustacheWithPadding() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|{{{ string_ }}}|";
 	var expected = @"|---|";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -731,7 +722,7 @@ public static void TestInterpolationTripleMustacheWithPadding() {
 }
 public static void TestInterpolationAmpersandWithPadding() { 
 	object data = new {string_ = @"---", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|{{& string_ }}|";
 	var expected = @"|---|";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -780,7 +771,7 @@ appropriate.
 */
 public static void TestInvertedFalsey() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^boolean}}This should be rendered.{{/boolean}}""";
 	var expected = @"""This should be rendered.""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -790,7 +781,7 @@ public static void TestInvertedFalsey() {
 }
 public static void TestInvertedTruthy() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^boolean}}This should not be rendered.{{/boolean}}""";
 	var expected = @"""""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -800,7 +791,7 @@ public static void TestInvertedTruthy() {
 }
 public static void TestInvertedContext() { 
 	object data = new {context = new {name = @"Joe", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^context}}Hi {{name}}.{{/context}}""";
 	var expected = @"""""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -810,7 +801,7 @@ public static void TestInvertedContext() {
 }
 public static void TestInvertedList() { 
 	object data = new {list = new object[] {new {n = 1, }, new {n = 2, }, new {n = 3, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^list}}{{n}}{{/list}}""";
 	var expected = @"""""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -820,7 +811,7 @@ public static void TestInvertedList() {
 }
 public static void TestInvertedEmptyList() { 
 	object data = new {list = new object[] {}, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^list}}Yay lists!{{/list}}""";
 	var expected = @"""Yay lists!""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -830,7 +821,7 @@ public static void TestInvertedEmptyList() {
 }
 public static void TestInvertedDoubled() { 
 	object data = new {two = @"second", bool_ = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{^bool_}}
 * first
 {{/bool_}}
@@ -850,7 +841,7 @@ public static void TestInvertedDoubled() {
 }
 public static void TestInvertedNestedFalsey() { 
 	object data = new {bool_ = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| A {{^bool_}}B {{^bool_}}C{{/bool_}} D{{/bool_}} E |";
 	var expected = @"| A B C D E |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -860,7 +851,7 @@ public static void TestInvertedNestedFalsey() {
 }
 public static void TestInvertedNestedTruthy() { 
 	object data = new {bool_ = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| A {{^bool_}}B {{^bool_}}C{{/bool_}} D{{/bool_}} E |";
 	var expected = @"| A  E |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -870,7 +861,7 @@ public static void TestInvertedNestedTruthy() {
 }
 public static void TestInvertedContextMisses() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"[{{^missing}}Cannot find key 'missing'!{{/missing}}]";
 	var expected = @"[Cannot find key 'missing'!]";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -880,7 +871,7 @@ public static void TestInvertedContextMisses() {
 }
 public static void TestInvertedDottedNamesTruthy() { 
 	object data = new {a = new {b = new {c = true, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^a.b.c}}Not Here{{/a.b.c}}"" == """"";
 	var expected = @""""" == """"";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -890,7 +881,7 @@ public static void TestInvertedDottedNamesTruthy() {
 }
 public static void TestInvertedDottedNamesFalsey() { 
 	object data = new {a = new {b = new {c = false, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^a.b.c}}Not Here{{/a.b.c}}"" == ""Not Here""";
 	var expected = @"""Not Here"" == ""Not Here""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -900,7 +891,7 @@ public static void TestInvertedDottedNamesFalsey() {
 }
 public static void TestInvertedDottedNamesBrokenChains() { 
 	object data = new {a = new {}, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{^a.b.c}}Not Here{{/a.b.c}}"" == ""Not Here""";
 	var expected = @"""Not Here"" == ""Not Here""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -910,7 +901,7 @@ public static void TestInvertedDottedNamesBrokenChains() {
 }
 public static void TestInvertedSurroundingWhitespace() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @" | {{^boolean}}	|	{{/boolean}} | 
 ";
 	var expected = @" | 	|	 | 
@@ -922,7 +913,7 @@ public static void TestInvertedSurroundingWhitespace() {
 }
 public static void TestInvertedInternalWhitespace() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @" | {{^boolean}} {{! Important Whitespace }}
  {{/boolean}} | 
 ";
@@ -936,7 +927,7 @@ public static void TestInvertedInternalWhitespace() {
 }
 public static void TestInvertedIndentedInlineSections() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @" {{^boolean}}NO{{/boolean}}
  {{^boolean}}WAY{{/boolean}}
 ";
@@ -950,7 +941,7 @@ public static void TestInvertedIndentedInlineSections() {
 }
 public static void TestInvertedStandaloneLines() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| This Is
 {{^boolean}}
 |
@@ -968,7 +959,7 @@ public static void TestInvertedStandaloneLines() {
 }
 public static void TestInvertedStandaloneIndentedLines() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| This Is
   {{^boolean}}
 |
@@ -986,7 +977,7 @@ public static void TestInvertedStandaloneIndentedLines() {
 }
 public static void TestInvertedStandaloneLineEndings() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|
 {{^boolean}}
 {{/boolean}}
@@ -1000,7 +991,7 @@ public static void TestInvertedStandaloneLineEndings() {
 }
 public static void TestInvertedStandaloneWithoutPreviousLine() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  {{^boolean}}
 ^{{/boolean}}
 /";
@@ -1013,7 +1004,7 @@ public static void TestInvertedStandaloneWithoutPreviousLine() {
 }
 public static void TestInvertedStandaloneWithoutNewline() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"^{{^boolean}}
 /
   {{/boolean}}";
@@ -1027,7 +1018,7 @@ public static void TestInvertedStandaloneWithoutNewline() {
 }
 public static void TestInvertedPadding() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|{{^ boolean }}={{/ boolean }}|";
 	var expected = @"|=|";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1056,7 +1047,7 @@ indentation, and prepended to each line of the partial before rendering.
 */
 public static void TestPartialsBasicBehavior() { 
 	object data = null;
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"text", @"from partial"},
 	};
 	var template = @"""{{>text}}""";
@@ -1068,7 +1059,7 @@ public static void TestPartialsBasicBehavior() {
 }
 public static void TestPartialsFailedLookup() { 
 	object data = null;
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 	};
 	var template = @"""{{>text}}""";
 	var expected = @"""""";
@@ -1079,7 +1070,7 @@ public static void TestPartialsFailedLookup() {
 }
 public static void TestPartialsContext() { 
 	object data = new {text = @"content", };
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @"*{{text}}*"},
 	};
 	var template = @"""{{>partial}}""";
@@ -1091,7 +1082,7 @@ public static void TestPartialsContext() {
 }
 public static void TestPartialsRecursion() { 
 	object data = new {content = @"X", nodes = new object[] {new {content = @"Y", nodes = new object[] {}, }, }, };
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"node", @"{{content}}<{{#nodes}}{{>node}}{{/nodes}}>"},
 	};
 	var template = @"{{>node}}";
@@ -1103,7 +1094,7 @@ public static void TestPartialsRecursion() {
 }
 public static void TestPartialsSurroundingWhitespace() { 
 	object data = null;
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @"	|	"},
 	};
 	var template = @"| {{>partial}} |";
@@ -1115,7 +1106,7 @@ public static void TestPartialsSurroundingWhitespace() {
 }
 public static void TestPartialsInlineIndentation() { 
 	object data = new {data = @"|", };
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @">
 >"},
 	};
@@ -1131,7 +1122,7 @@ public static void TestPartialsInlineIndentation() {
 }
 public static void TestPartialsStandaloneLineEndings() { 
 	object data = null;
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @">"},
 	};
 	var template = @"|
@@ -1146,7 +1137,7 @@ public static void TestPartialsStandaloneLineEndings() {
 }
 public static void TestPartialsStandaloneWithoutPreviousLine() { 
 	object data = null;
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @">
 >"},
 	};
@@ -1161,7 +1152,7 @@ public static void TestPartialsStandaloneWithoutPreviousLine() {
 }
 public static void TestPartialsStandaloneWithoutNewline() { 
 	object data = null;
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @">
 >"},
 	};
@@ -1178,7 +1169,7 @@ public static void TestPartialsStandaloneWithoutNewline() {
 public static void TestPartialsStandaloneIndentation() { 
 	object data = new {content = @"<
 ->", };
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @"|
 {{{content}}}
 |
@@ -1202,7 +1193,7 @@ public static void TestPartialsStandaloneIndentation() {
 }
 public static void TestPartialsPaddingWhitespace() { 
 	object data = new {boolean = true, };
-	var partials = new System.Collections.Generic.Dictionary<string, string>() {
+	var partials = new Dictionary<string, string>() {
 		{@"partial", @"[]"},
 	};
 	var template = @"|{{> partial }}|";
@@ -1254,7 +1245,7 @@ appropriate.
 */
 public static void TestSectionsTruthy() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#boolean}}This should be rendered.{{/boolean}}""";
 	var expected = @"""This should be rendered.""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1264,7 +1255,7 @@ public static void TestSectionsTruthy() {
 }
 public static void TestSectionsFalsey() { 
 	object data = new {boolean = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#boolean}}This should not be rendered.{{/boolean}}""";
 	var expected = @"""""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1274,7 +1265,7 @@ public static void TestSectionsFalsey() {
 }
 public static void TestSectionsContext() { 
 	object data = new {context = new {name = @"Joe", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#context}}Hi {{name}}.{{/context}}""";
 	var expected = @"""Hi Joe.""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1284,7 +1275,7 @@ public static void TestSectionsContext() {
 }
 public static void TestSectionsDeeplyNestedContexts() { 
 	object data = new {a = new {one = 1, }, b = new {two = 2, }, c = new {three = 3, }, d = new {four = 4, }, e = new {five = 5, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{#a}}
 {{one}}
 {{#b}}
@@ -1322,7 +1313,7 @@ public static void TestSectionsDeeplyNestedContexts() {
 }
 public static void TestSectionsList() { 
 	object data = new {list = new object[] {new {item = 1, }, new {item = 2, }, new {item = 3, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#list}}{{item}}{{/list}}""";
 	var expected = @"""123""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1332,7 +1323,7 @@ public static void TestSectionsList() {
 }
 public static void TestSectionsEmptyList() { 
 	object data = new {list = new object[] {}, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#list}}Yay lists!{{/list}}""";
 	var expected = @"""""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1342,7 +1333,7 @@ public static void TestSectionsEmptyList() {
 }
 public static void TestSectionsDoubled() { 
 	object data = new {two = @"second", bool_ = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{#bool_}}
 * first
 {{/bool_}}
@@ -1362,7 +1353,7 @@ public static void TestSectionsDoubled() {
 }
 public static void TestSectionsNestedTruthy() { 
 	object data = new {bool_ = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| A {{#bool_}}B {{#bool_}}C{{/bool_}} D{{/bool_}} E |";
 	var expected = @"| A B C D E |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1372,7 +1363,7 @@ public static void TestSectionsNestedTruthy() {
 }
 public static void TestSectionsNestedFalsey() { 
 	object data = new {bool_ = false, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| A {{#bool_}}B {{#bool_}}C{{/bool_}} D{{/bool_}} E |";
 	var expected = @"| A  E |";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1382,7 +1373,7 @@ public static void TestSectionsNestedFalsey() {
 }
 public static void TestSectionsContextMisses() { 
 	object data = null;
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"[{{#missing}}Found key 'missing'!{{/missing}}]";
 	var expected = @"[]";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1392,7 +1383,7 @@ public static void TestSectionsContextMisses() {
 }
 public static void TestSectionsImplicitIteratorString() { 
 	object data = new {list = new object[] {@"a", @"b", @"c", @"d", @"e", }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#list}}({{.}}){{/list}}""";
 	var expected = @"""(a)(b)(c)(d)(e)""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1402,7 +1393,7 @@ public static void TestSectionsImplicitIteratorString() {
 }
 public static void TestSectionsImplicitIteratorInteger() { 
 	object data = new {list = new object[] {1, 2, 3, 4, 5, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#list}}({{.}}){{/list}}""";
 	var expected = @"""(1)(2)(3)(4)(5)""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1412,7 +1403,7 @@ public static void TestSectionsImplicitIteratorInteger() {
 }
 public static void TestSectionsImplicitIteratorDecimal() { 
 	object data = new {list = new object[] {1.1, 2.2, 3.3, 4.4, 5.5, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#list}}({{.}}){{/list}}""";
 	var expected = @"""(1.1)(2.2)(3.3)(4.4)(5.5)""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1422,7 +1413,7 @@ public static void TestSectionsImplicitIteratorDecimal() {
 }
 public static void TestSectionsImplicitIteratorArray() { 
 	object data = new {list = new object[] {new object[] {1, 2, 3, }, new object[] {@"a", @"b", @"c", }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#list}}({{#.}}{{.}}{{/.}}){{/list}}""";
 	var expected = @"""(123)(abc)""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1432,7 +1423,7 @@ public static void TestSectionsImplicitIteratorArray() {
 }
 public static void TestSectionsDottedNamesTruthy() { 
 	object data = new {a = new {b = new {c = true, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#a.b.c}}Here{{/a.b.c}}"" == ""Here""";
 	var expected = @"""Here"" == ""Here""";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1442,7 +1433,7 @@ public static void TestSectionsDottedNamesTruthy() {
 }
 public static void TestSectionsDottedNamesFalsey() { 
 	object data = new {a = new {b = new {c = false, }, }, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#a.b.c}}Here{{/a.b.c}}"" == """"";
 	var expected = @""""" == """"";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1452,7 +1443,7 @@ public static void TestSectionsDottedNamesFalsey() {
 }
 public static void TestSectionsDottedNamesBrokenChains() { 
 	object data = new {a = new {}, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"""{{#a.b.c}}Here{{/a.b.c}}"" == """"";
 	var expected = @""""" == """"";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1462,7 +1453,7 @@ public static void TestSectionsDottedNamesBrokenChains() {
 }
 public static void TestSectionsSurroundingWhitespace() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @" | {{#boolean}}	|	{{/boolean}} | 
 ";
 	var expected = @" | 	|	 | 
@@ -1474,7 +1465,7 @@ public static void TestSectionsSurroundingWhitespace() {
 }
 public static void TestSectionsInternalWhitespace() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @" | {{#boolean}} {{! Important Whitespace }}
  {{/boolean}} | 
 ";
@@ -1488,7 +1479,7 @@ public static void TestSectionsInternalWhitespace() {
 }
 public static void TestSectionsIndentedInlineSections() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @" {{#boolean}}YES{{/boolean}}
  {{#boolean}}GOOD{{/boolean}}
 ";
@@ -1502,7 +1493,7 @@ public static void TestSectionsIndentedInlineSections() {
 }
 public static void TestSectionsStandaloneLines() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| This Is
 {{#boolean}}
 |
@@ -1520,7 +1511,7 @@ public static void TestSectionsStandaloneLines() {
 }
 public static void TestSectionsIndentedStandaloneLines() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"| This Is
   {{#boolean}}
 |
@@ -1538,7 +1529,7 @@ public static void TestSectionsIndentedStandaloneLines() {
 }
 public static void TestSectionsStandaloneLineEndings() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|
 {{#boolean}}
 {{/boolean}}
@@ -1552,7 +1543,7 @@ public static void TestSectionsStandaloneLineEndings() {
 }
 public static void TestSectionsStandaloneWithoutPreviousLine() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"  {{#boolean}}
 #{{/boolean}}
 /";
@@ -1565,7 +1556,7 @@ public static void TestSectionsStandaloneWithoutPreviousLine() {
 }
 public static void TestSectionsStandaloneWithoutNewline() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"#{{#boolean}}
 /
   {{/boolean}}";
@@ -1579,7 +1570,7 @@ public static void TestSectionsStandaloneWithoutNewline() {
 }
 public static void TestSectionsPadding() { 
 	object data = new {boolean = true, };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"|{{# boolean }}={{/ boolean }}|";
 	var expected = @"|=|";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1606,7 +1597,7 @@ the current delimiters, then interpolated in place of the section.
 */
 public static void TestLambdaLambdasInterpolation() { 
 	object data = new {lambda = (Func<string>) (() => "world"), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Hello, {{lambda}}!";
 	var expected = @"Hello, world!";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1616,7 +1607,7 @@ public static void TestLambdaLambdasInterpolation() {
 }
 public static void TestLambdaLambdasInterpolationExpansion() { 
 	object data = new {planet = @"world", lambda = (Func<string>) (() => "{{planet}}"), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"Hello, {{lambda}}!";
 	var expected = @"Hello, world!";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1626,7 +1617,7 @@ public static void TestLambdaLambdasInterpolationExpansion() {
 }
 public static void TestLambdaLambdasInterpolationAlternateDelimiters() { 
 	object data = new {planet = @"world", lambda = (Func<string>) (() => "|planet| => {{planet}}"), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{= | | =}}
 Hello, (|&lambda|)!";
 	var expected = @"Hello, (|planet| => world)!";
@@ -1638,7 +1629,7 @@ Hello, (|&lambda|)!";
 public static void TestLambdaLambdasInterpolationMultipleCalls() { 
 	int calls = 0;
 	object data = new {lambda = (Func<string>) (() => { calls++; return calls.ToString(); }), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{lambda}} == {{{lambda}}} == {{lambda}}";
 	var expected = @"1 == 2 == 3";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1648,7 +1639,7 @@ public static void TestLambdaLambdasInterpolationMultipleCalls() {
 }
 public static void TestLambdaLambdasEscaping() { 
 	object data = new {lambda = (Func<string>) (() => ">"), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"<{{lambda}}{{{lambda}}}";
 	var expected = @"<&gt;>";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1658,7 +1649,7 @@ public static void TestLambdaLambdasEscaping() {
 }
 public static void TestLambdaLambdasSection() { 
 	object data = new {x = @"Error!", lambda = (Func<string, string>) (s => (s == "{{x}}") ? "yes" : "no"), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"<{{#lambda}}{{x}}{{/lambda}}>";
 	var expected = @"<yes>";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1668,7 +1659,7 @@ public static void TestLambdaLambdasSection() {
 }
 public static void TestLambdaLambdasSectionExpansion() { 
 	object data = new {planet = @"Earth", lambda = (Func<string, string>) (txt => txt + "{{planet}}" + txt), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"<{{#lambda}}-{{/lambda}}>";
 	var expected = @"<-Earth->";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1678,7 +1669,7 @@ public static void TestLambdaLambdasSectionExpansion() {
 }
 public static void TestLambdaLambdasSectionAlternateDelimiters() { 
 	object data = new {planet = @"Earth", lambda = (Func<string, string>) (txt => txt + "{{planet}} => |planet|" + txt), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{= | | =}}<|#lambda|-|/lambda|>";
 	var expected = @"<-{{planet}} => Earth->";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1688,7 +1679,7 @@ public static void TestLambdaLambdasSectionAlternateDelimiters() {
 }
 public static void TestLambdaLambdasSectionMultipleCalls() { 
 	object data = new {lambda = (Func<string, string>) (txt => "__" + txt + "__"), };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"{{#lambda}}FILE{{/lambda}} != {{#lambda}}LINE{{/lambda}}";
 	var expected = @"__FILE__ != __LINE__";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1698,7 +1689,7 @@ public static void TestLambdaLambdasSectionMultipleCalls() {
 }
 public static void TestLambdaLambdasInvertedSection() { 
 	object data = new {lambda = (Func<string, bool>) (txt => false), static_ = @"static", };
-	System.Collections.Generic.Dictionary<string, string> partials = null;
+	Dictionary<string, string> partials = null;
 	var template = @"<{{^lambda}}{{static}}{{/lambda}}>";
 	var expected = @"<>";
 	var actual = new MustacheRenderer().Render(template, data, partials);
@@ -1754,7 +1745,6 @@ public static void RunAllTests() {
 	TestInterpolationDottedNamesBrokenChains();
 	TestInterpolationDottedNamesBrokenChainResolution();
 	TestInterpolationDottedNamesInitialResolution();
-	TestInterpolationDottedNamesContextPrecedence();
 	TestInterpolationInterpolationSurroundingWhitespace();
 	TestInterpolationTripleMustacheSurroundingWhitespace();
 	TestInterpolationAmpersandSurroundingWhitespace();

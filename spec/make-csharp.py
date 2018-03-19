@@ -130,12 +130,12 @@ def render_spec(f, spec):
             f.write("\tobject data = null;\n")
 
         if "partials" in test:
-            f.write("\tvar partials = new System.Collections.Generic.Dictionary<string, string>() {\n");
+            f.write("\tvar partials = new Dictionary<string, string>() {\n");
             for key, value in test["partials"].items():
                 f.write("\t\t{" + raw_literal(key) + ", " + raw_literal(value) + "},\n")
             f.write("\t};\n")
         else:
-            f.write("\tSystem.Collections.Generic.Dictionary<string, string> partials = null;\n")
+            f.write("\tDictionary<string, string> partials = null;\n")
 
         f.write("\tvar template = " + template + ";\n")
         f.write("\tvar expected = " + expected + ";\n")
@@ -147,6 +147,7 @@ def render_spec(f, spec):
 
 with open(output, "w") as f:
     f.write("using System;\n")
+    f.write("using System.Collections.Generic;\n")
     f.write("using Mustache;\n")
     f.write("\n")
     f.write("namespace Mustache.Test {\n")
