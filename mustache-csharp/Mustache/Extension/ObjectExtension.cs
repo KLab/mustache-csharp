@@ -39,6 +39,7 @@ namespace Mustache.Extension
             if (self is Func<bool>) return (self as Func<bool>)();
             return null;
         }
+
         public static object InvokeSectionLambda(this object self, string template)
         {
             if (self is Func<string, string>) return (self as Func<string, string>)(template);
@@ -68,7 +69,4 @@ namespace Mustache.Extension
             return false;
         }
     }
-
-
-
 }
