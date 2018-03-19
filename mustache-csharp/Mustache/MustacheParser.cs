@@ -4,6 +4,17 @@ using System.Collections.Generic;
 
 namespace Mustache
 {
+    public struct Delimiter
+    {
+        public string Left;
+        public string Right;
+
+        public static Delimiter Default()
+        {
+            return new Delimiter { Left = "{{", Right = "}}" };
+        }
+    }
+
     public enum TokenType
     {
         Text,
@@ -19,18 +30,28 @@ namespace Mustache
 
     public class Token
     {
+        public string Template;
         public int StartIndex;
         public TokenType Type;
         public string Value;
         public string PartialIndent;
         public List<Token> Children;
         public bool IsBol;
+
+        public int SectionStartIndex;
+        public int SectionEndIndex;
+
+        public string SectionTemplate
+        {
+            get
+            {
+                return Template.Substring(SectionStartIndex, SectionEndIndex - SectionStartIndex + 1);
+            }
+        }
     }
 
     public class MustacheParser
     {
-        public static readonly string[] DefaultTags = { "{{", "}}" };
-
         public TokenType TokenInfo(char c)
         {
             switch (c)
@@ -71,6 +92,7 @@ namespace Mustache
                                   1U << (int)TokenType.SectionClose |
                                   1U << (int)TokenType.Partial |
                                   1U << (int)TokenType.DelimiterChange;
+
             for (int i = 0; i < tokens.Count; ++i)
             {
                 tagMask |= 1U << (int)tokens[i].Type;
@@ -124,7 +146,6 @@ namespace Mustache
                 tokens.RemoveAt(removes[i]);
             }
         }
-
         List<Token> NestTokens(List<Token> tokens)
         {
             var root = new List<Token>();
@@ -157,6 +178,8 @@ namespace Mustache
                         throw new Exception("Unclosed section: " + section.Value);
                     }
 
+                    section.SectionEndIndex = token.StartIndex - 1;
+
                     if (0 < sections.Count)
                     {
                         collector = sections[sections.Count - 1].Children;
@@ -181,13 +204,9 @@ namespace Mustache
 
             return root;
         }
-        public List<Token> Parse(string template, string[] tags = null)
-        {
-            if (tags == null)
-            {
-                tags = DefaultTags;
-            }
 
+        public Tuple<List<Token>, Delimiter> Parse(string template, Delimiter delimiter)
+        {
             var scanner = new MustacheScanner(template);
             var tokens = new List<Token>();
             var start = scanner.Pos;
@@ -199,6 +218,7 @@ namespace Mustache
                 {
                     tokens.Add(new Token
                     {
+                        Template = template,
                         Type = TokenType.Text,
                         Value = template.Substring(start, end - start),
                         StartIndex = start,
@@ -220,7 +240,7 @@ namespace Mustache
                     start = scanner.Pos + 1;
                     ok = scanner.Seek(1);
                 }
-                else if (scanner.StartsWith(tags[0]))
+                else if (scanner.StartsWith(delimiter.Left))
                 {
                     if (start < scanner.Pos)
                     {
@@ -228,7 +248,7 @@ namespace Mustache
                         start = scanner.Pos;
                     }
 
-                    ok = scanner.Seek(tags[0].Length); // discard begin tag
+                    ok = scanner.Seek(delimiter.Left.Length); // discard begin tag
 
                     var tokenChar = scanner.Peek();
                     var tokenType = TokenInfo(tokenChar);
@@ -243,38 +263,44 @@ namespace Mustache
                     {
                         value = scanner.ReadUntilJustBefore("=");
                         scanner.Seek(1); // discard '='
-                        scanner.SeekUntilJustBefore(tags[1]);
+                        scanner.SeekUntilJustBefore(delimiter.Right);
                     }
                     else if (tokenType == TokenType.UnescapedVariable && tokenChar == '{')
                     {
-                        value = scanner.ReadUntilJustBefore("}" + tags[1]);
+                        value = scanner.ReadUntilJustBefore("}" + delimiter.Right);
                         scanner.Seek(1); // discard '}'
                     }
                     else
                     {
-                        value = scanner.ReadUntilJustBefore(tags[1]);
+                        value = scanner.ReadUntilJustBefore(delimiter.Right);
                     }
 
-                    if (!scanner.StartsWith(tags[1]))
+                    if (!scanner.StartsWith(delimiter.Right))
                     {
                         // TODO: be better exception
                         throw new Exception("Unclosed tag at " + scanner.Pos);
                     }
 
-                    tokens.Add(new Token
+                    var token = new Token
                     {
+                        Template = template,
                         Type = tokenType,
                         Value = value.Trim(), // trim to use it as key string
                         StartIndex = start,
                         IsBol = start == lastBol,
-                    });
+                    };
 
-                    start = scanner.Pos + tags[1].Length;
-                    ok = scanner.Seek(tags[1].Length); // discard end tag
+                    start = scanner.Pos + delimiter.Right.Length;
+                    ok = scanner.Seek(delimiter.Right.Length); // discard end tag
+
+                    token.SectionStartIndex = start;
+                    tokens.Add(token);
 
                     if (tokenType == TokenType.DelimiterChange)
                     {
-                        tags = value.Split(null as string[], StringSplitOptions.RemoveEmptyEntries);
+                        var sp = value.Split(null as string[], StringSplitOptions.RemoveEmptyEntries);
+                        delimiter.Left = sp[0];
+                        delimiter.Right = sp[1];
                     }
                 }
                 else
@@ -286,7 +312,8 @@ namespace Mustache
             pushText(scanner.Pos + 1);
 
             SquashTokens(ref tokens);
-            return NestTokens(tokens);
+            tokens = NestTokens(tokens);
+            return Tuple.Create(tokens, delimiter);
         }
 
     }

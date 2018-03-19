@@ -14,10 +14,13 @@ namespace Mustache
         public Dictionary<string, Func<MustacheContext, string>> PartialCache { get; private set; }
         public Dictionary<string, string> Partials { get; private set; }
 
+        public Delimiter CurrentDelimiter { get; private set; }
+
         public MustacheRenderer()
         {
             Cache = new Dictionary<string, Func<MustacheContext, string>>();
             PartialCache = new Dictionary<string, Func<MustacheContext, string>>();
+            CurrentDelimiter = Delimiter.Default();
         }
 
         Func<MustacheContext, MustacheRenderer, string> CompileTokens(List<Token> tokens)
@@ -68,10 +71,19 @@ namespace Mustache
             };
         }
 
-        Func<MustacheContext, string> Compile(string template, string[] tags)
+        // When Lambdas are used as the data value for Section tag, 
+        // the returned value MUST be rendered against the current delimiters.
+        Func<MustacheContext, string> CompileAgainstCurrentDelimiter(string template)
         {
-            var tokens = new MustacheParser().Parse(template, tags);
-            return Compile(tokens);
+            var parsed = new MustacheParser().Parse(template, CurrentDelimiter);
+            return Compile(parsed.Item1);
+        }
+
+        Func<MustacheContext, string> Compile(string template)
+        {
+            var parsed = new MustacheParser().Parse(template, Delimiter.Default());
+            CurrentDelimiter = parsed.Item2;
+            return Compile(parsed.Item1);
         }
 
         Func<MustacheContext, string> Compile(List<Token> tokens)
@@ -98,7 +110,7 @@ namespace Mustache
 
             if (!Cache.ContainsKey(template))
             {
-                Cache[template] = Compile(template, null);
+                Cache[template] = Compile(template);
             }
 
             return Cache[template](new MustacheContext(view, null));
@@ -111,6 +123,16 @@ namespace Mustache
             if (value.IsFalsey())
             {
                 return string.Empty;
+            }
+
+            if (value.IsLambda())
+            {
+                var template = value.InvokeSectionLambda(token.SectionTemplate) as string;
+                if (!string.IsNullOrEmpty(template))
+                {
+                    var fn = CompileAgainstCurrentDelimiter(template);
+                    return fn(ctx);
+                }
             }
 
             if (value is ICollection)
@@ -154,7 +176,7 @@ namespace Mustache
 
                 if (string.IsNullOrEmpty(indent))
                 {
-                    fn = Compile(partial, null);
+                    fn = Compile(partial);
                 }
                 else
                 {
@@ -169,7 +191,7 @@ namespace Mustache
                         var s = partial.Substring(0, partial.Length - 1);
                         replaced = Regex.Replace(s, @"^", indent, RegexOptions.Multiline) + "\n";
                     }
-                    fn = Compile(replaced, null);
+                    fn = Compile(replaced);
                 }
 
                 PartialCache[key] = fn;
@@ -187,15 +209,15 @@ namespace Mustache
         {
             var value = ctx.Lookup(name);
 
-            var f = value as Func<MustacheContext, string>;
-            if (f != null)
-            {
-                value = f(ctx);
-            }
-
             if (value == null)
             {
                 return string.Empty;
+            }
+
+            if (value.IsLambda())
+            {
+                var tpl = value.InvokeNameLambda() as string;
+                value = Compile(tpl)(ctx);
             }
 
             if (value.IsFalsey())

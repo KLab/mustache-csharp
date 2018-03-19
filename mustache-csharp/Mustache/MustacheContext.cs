@@ -64,6 +64,7 @@ namespace Mustache
                     else
                     {
                         var v = ctx.View.GetValue(name);
+
                         if (v != null)
                         {
                             value = v;

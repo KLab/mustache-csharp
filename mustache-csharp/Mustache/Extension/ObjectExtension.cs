@@ -33,6 +33,28 @@ namespace Mustache.Extension
             return null;
         }
 
+        public static object InvokeNameLambda(this object self)
+        {
+            if (self is Func<string>) return (self as Func<string>)();
+            if (self is Func<bool>) return (self as Func<bool>)();
+            return null;
+        }
+        public static object InvokeSectionLambda(this object self, string template)
+        {
+            if (self is Func<string, string>) return (self as Func<string, string>)(template);
+            if (self is Func<string, bool>) return (self as Func<string, bool>)(template);
+            return null;
+        }
+
+        public static bool IsLambda(this object self)
+        {
+            if (self is Func<string, string>) return true;
+            if (self is Func<string, bool>) return true;
+            if (self is Func<string>) return true;
+            if (self is Func<bool>) return true;
+            return false;
+        }
+
         public static bool IsFalsey(this object self)
         {
             if (self == null)
