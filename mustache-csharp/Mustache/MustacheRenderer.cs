@@ -49,7 +49,6 @@ namespace Mustache
                 {
                     case TokenType.SectionOpen:
                         builder.Append(RenderSection(token, ctx));
-
                         break;
                     case TokenType.InvertedSectionOpen:
                         builder.Append(RenderInverted(token, ctx));
@@ -71,6 +70,7 @@ namespace Mustache
 
             return builder.ToString();
         }
+
         string RenderSection(Token token, MustacheContext ctx)
         {
             var value = ctx.Lookup(token.Name);
