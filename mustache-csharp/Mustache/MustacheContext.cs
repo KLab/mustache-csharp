@@ -19,6 +19,16 @@ namespace Mustache
 
         public object Lookup(string name)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
+
+            if (name.Trim() == string.Empty)
+            {
+                throw new ArgumentException("empty name", "name");
+            }
+
             if (Cache.ContainsKey(name))
             {
                 return Cache[name];

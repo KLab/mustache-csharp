@@ -20,6 +20,11 @@ namespace Mustache
 
         public string Render(string template, object view, Dictionary<string, string> partials)
         {
+            if (template == null)
+            {
+                throw new ArgumentNullException("template");
+            }
+
             if (partials != null)
             {
                 Partials = partials;

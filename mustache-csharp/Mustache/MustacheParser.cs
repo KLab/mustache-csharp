@@ -83,6 +83,21 @@ namespace Mustache
             }
         }
 
+        static readonly HashSet<string> ProhibitedWords = new HashSet<string>()
+        {
+            "abstract", "as", "base", "bool", "break", "byte", "case", "catch",
+            "char", "checked", "class", "const", "continue", "decimal", "default",
+            "delegate", "do", "double", "else", "enum", "event", "explicit", "extern",
+            "false", "finally", "fixed", "float", "for", "foreach", "goto", "if",
+            "implicit", "in", "int", "interface", "internal", "is", "lock", "long",
+            "namespace", "new", "null", "object", "operator", "out", "override",
+            "params", "private", "protected", "public", "readonly", "ref", "return",
+            "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string",
+            "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong",
+            "unchecked", "unsafe", "ushort", "using", "using static", "virtual", "void",
+            "volatile", "while"
+        };
+
         void SquashTokens(ref List<Token> tokens)
         {
             Func<string, bool> isWhiteText = (s) =>
@@ -101,7 +116,6 @@ namespace Mustache
             var startIndex = 0;
             var removes = new List<int>();
             var tmp = new List<int>();
-            var partialTokenMask = 1U << (int)TokenType.Partial;
             var squashTokenMask = 1U << (int)TokenType.Comment |
                                   1U << (int)TokenType.SectionOpen |
                                   1U << (int)TokenType.InvertedSectionOpen |
@@ -116,7 +130,6 @@ namespace Mustache
                 if (i + 1 == tokens.Count || tokens[i + 1].IsBol)
                 {
                     bool hasSquashToken = (tagMask & squashTokenMask) != 0;
-                    bool hasPartialToken = (tagMask & partialTokenMask) != 0;
                     bool textOnly = (tagMask & ~(squashTokenMask | (1U << (int)TokenType.Text))) == 0;
 
                     if (hasSquashToken && textOnly)
@@ -181,8 +194,7 @@ namespace Mustache
                 {
                     if (sections.Count == 0)
                     {
-                        // TODO: be better Exception
-                        throw new Exception("Unopened section: " + token.Name);
+                        throw new MustacheException("Unopened section: " + token.Name);
                     }
 
                     var section = sections[sections.Count - 1];
@@ -190,8 +202,7 @@ namespace Mustache
 
                     if (section.Name != token.Name)
                     {
-                        // TODO: be better Exception
-                        throw new Exception("Unclosed section: " + section.Name);
+                        throw new MustacheException("Unclosed section: " + section.Name);
                     }
 
                     section.SectionEndIndex = token.StartIndex - 1;
@@ -213,9 +224,8 @@ namespace Mustache
 
             if (0 < sections.Count)
             {
-                // TODO: be better Exception
                 var section = sections[sections.Count - 1];
-                throw new Exception("Unclosed section: " + section.Name);
+                throw new MustacheException("Unclosed section: " + section.Name);
             }
 
             return root;
@@ -278,31 +288,51 @@ namespace Mustache
 
                     if (tokenType == TokenType.DelimiterChange)
                     {
-                        value = scanner.ReadUntilJustBefore("=");
+                        value = scanner.ReadUntilJustBefore("=").Trim();
                         scanner.Seek(1); // discard '='
                         scanner.SeekUntilJustBefore(delimiter.Close);
                     }
                     else if (tokenType == TokenType.UnescapedVariable && tokenChar == '{')
                     {
-                        value = scanner.ReadUntilJustBefore("}" + delimiter.Close);
+                        value = scanner.ReadUntilJustBefore("}" + delimiter.Close).Trim();
                         scanner.Seek(1); // discard '}'
                     }
                     else
                     {
-                        value = scanner.ReadUntilJustBefore(delimiter.Close);
+                        value = scanner.ReadUntilJustBefore(delimiter.Close).Trim();
                     }
 
                     if (!scanner.StartsWith(delimiter.Close))
                     {
-                        // TODO: be better exception
-                        throw new Exception("Unclosed tag at " + scanner.Pos);
+                        throw new MustacheException("Unclosed tag at " + scanner.Pos);
+                    }
+
+                    if (tokenType != TokenType.Comment && tokenType != TokenType.DelimiterChange)
+                    {
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            throw new MustacheException("Empty token name at " + scanner.Pos);
+                        }
+
+                        foreach (var c in value)
+                        {
+                            if (!(char.IsLetterOrDigit(c) || c == '.' || c == '_'))
+                            {
+                                throw new MustacheException("Invalid token name '" + value + "' at " + scanner.Pos);
+                            }
+                        }
+
+                        if (ProhibitedWords.Contains(value))
+                        {
+                            throw new MustacheException("Invalid token name '" + value + "' at " + scanner.Pos);
+                        }
                     }
 
                     var token = new Token
                     {
                         Template = template,
                         Type = tokenType,
-                        Name = value.Trim(), // trim to use it as key string
+                        Name = value,
                         StartIndex = start,
                         IsBol = start == lastBol,
                         CurrentDelimiter = delimiter,
@@ -316,7 +346,17 @@ namespace Mustache
 
                     if (tokenType == TokenType.DelimiterChange)
                     {
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            throw new MustacheException("Empty delimiter at " + scanner.Pos);
+                        }
+
                         var sp = value.Split(null as string[], StringSplitOptions.RemoveEmptyEntries);
+                        if (sp.Length != 2)
+                        {
+                            throw new MustacheException("Invalid delimiter format at " + scanner.Pos);
+                        }
+
                         delimiter = new Delimiter { Open = sp[0], Close = sp[1] };
                     }
                 }
