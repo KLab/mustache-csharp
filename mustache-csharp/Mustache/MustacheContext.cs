@@ -53,10 +53,9 @@ namespace Mustache
                 {
                     if (name.Contains("."))
                     {
-                        var names = name.Split(new char[] { '.' });
                         value = ctx.View;
 
-                        foreach (var s in names)
+                        foreach (var s in name.Split('.'))
                         {
                             var v = value.GetValue(s);
                             if (v != null)
@@ -69,7 +68,6 @@ namespace Mustache
                     else
                     {
                         var v = ctx.View.GetValue(name);
-
                         if (v != null)
                         {
                             value = v;
