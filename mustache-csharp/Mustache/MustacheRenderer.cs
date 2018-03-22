@@ -149,17 +149,7 @@ namespace Mustache
                 }
                 else
                 {
-                    // FIXME: dirty
-                    var replaced = string.Empty;
-                    if (partial[partial.Length - 1] != '\n')
-                    {
-                        replaced = Regex.Replace(partial, @"^", indent, RegexOptions.Multiline);
-                    }
-                    else
-                    {
-                        var s = partial.Substring(0, partial.Length - 1);
-                        replaced = Regex.Replace(s, @"^", indent, RegexOptions.Multiline) + "\n";
-                    }
+                    var replaced = Regex.Replace(partial, @"^(.+)$", indent + "$1", RegexOptions.Multiline);
                     Cache[key] = new MustacheParser().Parse(replaced, Delimiter.Default());
                 }
             }
