@@ -91,6 +91,7 @@ def dirty_fix(spec):
         "{{^bool}}" : "{{^bool_}}",
         "{{/bool}}" : "{{/bool_}}",
         "{{#bool}}" : "{{#bool_}}",
+        "{{static}}" : "{{static_}}",
     }
 
     for test in spec["tests"]:

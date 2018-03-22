@@ -1690,7 +1690,7 @@ public static void TestLambdaLambdasSectionMultipleCalls() {
 public static void TestLambdaLambdasInvertedSection() { 
 	object data = new {lambda = (Func<string, bool>) (txt => false), static_ = @"static", };
 	Dictionary<string, string> partials = null;
-	var template = @"<{{^lambda}}{{static}}{{/lambda}}>";
+	var template = @"<{{^lambda}}{{static_}}{{/lambda}}>";
 	var expected = @"<>";
 	var actual = new MustacheRenderer().Render(template, data, partials);
 	if (expected != actual) { 
