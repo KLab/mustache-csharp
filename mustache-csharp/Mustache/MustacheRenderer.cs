@@ -8,17 +8,22 @@ using Mustache.Extension;
 
 namespace Mustache
 {
+    /// <summary>
+    /// Mustache template renderer
+    /// </summary>
     public class MustacheRenderer
     {
-        public Dictionary<string, List<Token>> Cache { get; private set; }
-        public Dictionary<string, string> Partials { get; private set; }
+        Dictionary<string, List<Token>> Cache = new Dictionary<string, List<Token>>();
+        Dictionary<string, string> Partials;
 
-        public MustacheRenderer()
-        {
-            Cache = new Dictionary<string, List<Token>>();
-        }
-
-        public string Render(string template, object view, Dictionary<string, string> partials)
+        /// <summary>
+        /// Parse and apply the template and returns rendered string
+        /// </summary>
+        /// <param name="template">mustache template string</param>
+        /// <param name="data">data object</param>
+        /// <param name="partials">partial templates</param>
+        /// <returns>rendered string</returns>
+        public string Render(string template, object data, Dictionary<string, string> partials)
         {
             if (template == null)
             {
@@ -40,9 +45,8 @@ namespace Mustache
                 Cache[template] = new MustacheParser().Parse(template, Delimiter.Default());
             }
 
-            return RenderTokens(new MustacheContext(view, null), Cache[template]);
+            return RenderTokens(new MustacheContext(data, null), Cache[template]);
         }
-
 
         string RenderTokens(MustacheContext ctx, List<Token> tokens)
         {
@@ -68,7 +72,7 @@ namespace Mustache
                         builder.Append(RenderName(token.Name, ctx, false));
                         break;
                     case TokenType.Text:
-                        builder.Append(token.Template, token.TextStartIndex, token.TextLength);
+                        builder.Append(token.Template, token.StartIndex, token.TextLength);
                         break;
                 }
             }
@@ -112,7 +116,6 @@ namespace Mustache
 
             return RenderTokens(new MustacheContext(value, ctx), token.Children);
         }
-
 
         string RenderInverted(Token token, MustacheContext ctx)
         {
