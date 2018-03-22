@@ -4,17 +4,34 @@ using System.Collections.Generic;
 
 namespace Mustache
 {
+    /// <summary>
+    /// Holds delimiter strings
+    /// </summary>
     public struct Delimiter
     {
+        /// <summary>
+        /// Left-side delimiter
+        /// </summary>
         public string Open;
+
+        /// <summary>
+        /// Right-side delimiter
+        /// </summary>
         public string Close;
 
+        /// <summary>
+        /// Returns default mustache delimiter
+        /// </summary>
+        /// <returns>Default mustache delimiter</returns>
         public static Delimiter Default()
         {
             return new Delimiter { Open = "{{", Close = "}}" };
         }
     }
 
+    /// <summary>
+    /// Token types
+    /// </summary>
     public enum TokenType
     {
         Text,
@@ -28,21 +45,70 @@ namespace Mustache
         DelimiterChange
     }
 
+    /// <summary>
+    /// Holds part of parsed template
+    /// </summary>
     public class Token
     {
+        /// <summary>
+        /// Original template
+        /// </summary>
         public string Template;
+
+        /// <summary>
+        /// Starting index of this token in the Template
+        /// </summary>
         public int StartIndex;
+
+        /// <summary>
+        /// Token type
+        /// </summary>
         public TokenType Type;
+
+        /// <summary>
+        /// Variable tag name
+        /// </summary>
         public string Name;
+
+        /// <summary>
+        /// Witespaces of standalone partial tag
+        /// </summary>
         public string PartialIndent;
+
+        /// <summary>
+        /// Child tokens of this token.
+        /// </summary>
         public List<Token> Children;
+
+        /// <summary>
+        /// Whether this token appeared at the beginning of line or not
+        /// </summary>
         public bool IsBol;
-        public int TextStartIndex;
+
+        /// <summary>
+        /// Number of characters in this text token
+        /// </summary>
         public int TextLength;
+
+        /// <summary>
+        /// Starting index of this section in the Template
+        /// </summary>
         public int SectionStartIndex;
+
+        /// <summary>
+        /// Ending index of this section in the Template
+        /// </summary>
         public int SectionEndIndex;
+
+        /// <summary>
+        /// Delimiter used when this token parsed
+        /// </summary>
         public Delimiter CurrentDelimiter;
 
+        /// <summary>
+        /// Returns contents of text token
+        /// </summary>
+        /// <returns>Contents of text token</returns>
         public string Text
         {
             get
@@ -52,10 +118,14 @@ namespace Mustache
                     return string.Empty;
                 }
 
-                return Template.Substring(TextStartIndex, TextLength);
+                return Template.Substring(StartIndex, TextLength);
             }
         }
 
+        /// <summary>
+        /// Returns raw text block of this section
+        /// </summary>
+        /// <returns>Raw text block of this section</returns>
         public string SectionTemplate
         {
             get
@@ -65,9 +135,159 @@ namespace Mustache
         }
     }
 
+    /// <summary>
+    /// Mustache parser
+    /// </summary>
     public class MustacheParser
     {
-        public static TokenType TokenInfo(char c)
+        /// <summary>
+        /// Parses a single mustache template string and returns the corresponding tokens
+        /// </summary>
+        /// <param name="template">the mustache template string</param>
+        /// <param name="delimiter">the delimiter</param>
+        /// <returns>corresponding tokens</returns>
+        public List<Token> Parse(string template, Delimiter delimiter)
+        {
+            var scanner = new MustacheScanner(template);
+            var tokens = new List<Token>();
+            var start = scanner.Pos;
+            var lastBol = 0;
+
+            Action<int> pushText = (int end) =>
+            {
+                if (start < end && end <= template.Length)
+                {
+                    tokens.Add(new Token
+                    {
+                        Template = template,
+                        Type = TokenType.Text,
+                        StartIndex = start,
+                        TextLength = end - start,
+                        IsBol = start == lastBol,
+                        CurrentDelimiter = delimiter,
+                    });
+                }
+            };
+
+            for (var ok = true; ok;)
+            {
+                if (scanner.Pos == 0 || scanner.Peek(-1) == '\n')
+                {
+                    lastBol = scanner.Pos;
+                }
+
+                if (scanner.Peek() == '\n')
+                {
+                    pushText(scanner.Pos + 1);
+                    start = scanner.Pos + 1;
+                    ok = scanner.Seek(1);
+                }
+                else if (scanner.StartsWith(delimiter.Open))
+                {
+                    if (start < scanner.Pos)
+                    {
+                        pushText(scanner.Pos);
+                        start = scanner.Pos;
+                    }
+
+                    ok = scanner.Seek(delimiter.Open.Length); // discard begin tag
+
+                    var tokenChar = scanner.Peek();
+                    var tokenType = TokenInfo(tokenChar);
+                    var value = string.Empty;
+
+                    if (tokenType != TokenType.Variable)
+                    {
+                        scanner.Seek(1); // discard token type character
+                    }
+
+                    if (tokenType == TokenType.DelimiterChange)
+                    {
+                        value = scanner.ReadUntilJustBefore("=").Trim();
+                        scanner.Seek(1); // discard '='
+                        scanner.SeekUntilJustBefore(delimiter.Close);
+                    }
+                    else if (tokenType == TokenType.UnescapedVariable && tokenChar == '{')
+                    {
+                        value = scanner.ReadUntilJustBefore("}" + delimiter.Close).Trim();
+                        scanner.Seek(1); // discard '}'
+                    }
+                    else
+                    {
+                        value = scanner.ReadUntilJustBefore(delimiter.Close).Trim();
+                    }
+
+                    if (!scanner.StartsWith(delimiter.Close))
+                    {
+                        throw new MustacheException("Unclosed tag at " + scanner.Pos);
+                    }
+
+                    if (tokenType != TokenType.Comment && tokenType != TokenType.DelimiterChange)
+                    {
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            throw new MustacheException("Empty token name at " + scanner.Pos);
+                        }
+
+                        foreach (var c in value)
+                        {
+                            if (!(char.IsLetterOrDigit(c) || c == '.' || c == '_'))
+                            {
+                                throw new MustacheException("Invalid token name '" + value + "' at " + scanner.Pos);
+                            }
+                        }
+
+                        if (ProhibitedWords.Contains(value))
+                        {
+                            throw new MustacheException("Invalid token name '" + value + "' at " + scanner.Pos);
+                        }
+                    }
+
+                    var token = new Token
+                    {
+                        Template = template,
+                        Type = tokenType,
+                        Name = value,
+                        StartIndex = start,
+                        IsBol = start == lastBol,
+                        CurrentDelimiter = delimiter,
+                    };
+
+                    start = scanner.Pos + delimiter.Close.Length;
+                    ok = scanner.Seek(delimiter.Close.Length); // discard end tag
+
+                    token.SectionStartIndex = start;
+                    tokens.Add(token);
+
+                    if (tokenType == TokenType.DelimiterChange)
+                    {
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            throw new MustacheException("Empty delimiter at " + scanner.Pos);
+                        }
+
+                        var sp = value.Split(null as string[], StringSplitOptions.RemoveEmptyEntries);
+                        if (sp.Length != 2)
+                        {
+                            throw new MustacheException("Invalid delimiter format at " + scanner.Pos);
+                        }
+
+                        delimiter = new Delimiter { Open = sp[0], Close = sp[1] };
+                    }
+                }
+                else
+                {
+                    ok = scanner.Seek(1);
+                }
+            }
+
+            pushText(scanner.Pos + 1);
+
+            SquashTokens(ref tokens);
+            return NestTokens(tokens);
+        }
+
+        static TokenType TokenInfo(char c)
         {
             switch (c)
             {
@@ -230,147 +450,5 @@ namespace Mustache
 
             return root;
         }
-
-        public List<Token> Parse(string template, Delimiter delimiter)
-        {
-            var scanner = new MustacheScanner(template);
-            var tokens = new List<Token>();
-            var start = scanner.Pos;
-            var lastBol = 0;
-
-            Action<int> pushText = (int end) =>
-            {
-                if (start < end && end <= template.Length)
-                {
-                    tokens.Add(new Token
-                    {
-                        Template = template,
-                        Type = TokenType.Text,
-                        TextStartIndex = start,
-                        TextLength = end - start,
-                        IsBol = start == lastBol,
-                        CurrentDelimiter = delimiter,
-                    });
-                }
-            };
-
-            for (var ok = true; ok;)
-            {
-                if (scanner.Pos == 0 || scanner.Peek(-1) == '\n')
-                {
-                    lastBol = scanner.Pos;
-                }
-
-                if (scanner.Peek() == '\n')
-                {
-                    pushText(scanner.Pos + 1);
-                    start = scanner.Pos + 1;
-                    ok = scanner.Seek(1);
-                }
-                else if (scanner.StartsWith(delimiter.Open))
-                {
-                    if (start < scanner.Pos)
-                    {
-                        pushText(scanner.Pos);
-                        start = scanner.Pos;
-                    }
-
-                    ok = scanner.Seek(delimiter.Open.Length); // discard begin tag
-
-                    var tokenChar = scanner.Peek();
-                    var tokenType = TokenInfo(tokenChar);
-                    var value = string.Empty;
-
-                    if (tokenType != TokenType.Variable)
-                    {
-                        scanner.Seek(1); // discard token type character
-                    }
-
-                    if (tokenType == TokenType.DelimiterChange)
-                    {
-                        value = scanner.ReadUntilJustBefore("=").Trim();
-                        scanner.Seek(1); // discard '='
-                        scanner.SeekUntilJustBefore(delimiter.Close);
-                    }
-                    else if (tokenType == TokenType.UnescapedVariable && tokenChar == '{')
-                    {
-                        value = scanner.ReadUntilJustBefore("}" + delimiter.Close).Trim();
-                        scanner.Seek(1); // discard '}'
-                    }
-                    else
-                    {
-                        value = scanner.ReadUntilJustBefore(delimiter.Close).Trim();
-                    }
-
-                    if (!scanner.StartsWith(delimiter.Close))
-                    {
-                        throw new MustacheException("Unclosed tag at " + scanner.Pos);
-                    }
-
-                    if (tokenType != TokenType.Comment && tokenType != TokenType.DelimiterChange)
-                    {
-                        if (string.IsNullOrEmpty(value))
-                        {
-                            throw new MustacheException("Empty token name at " + scanner.Pos);
-                        }
-
-                        foreach (var c in value)
-                        {
-                            if (!(char.IsLetterOrDigit(c) || c == '.' || c == '_'))
-                            {
-                                throw new MustacheException("Invalid token name '" + value + "' at " + scanner.Pos);
-                            }
-                        }
-
-                        if (ProhibitedWords.Contains(value))
-                        {
-                            throw new MustacheException("Invalid token name '" + value + "' at " + scanner.Pos);
-                        }
-                    }
-
-                    var token = new Token
-                    {
-                        Template = template,
-                        Type = tokenType,
-                        Name = value,
-                        StartIndex = start,
-                        IsBol = start == lastBol,
-                        CurrentDelimiter = delimiter,
-                    };
-
-                    start = scanner.Pos + delimiter.Close.Length;
-                    ok = scanner.Seek(delimiter.Close.Length); // discard end tag
-
-                    token.SectionStartIndex = start;
-                    tokens.Add(token);
-
-                    if (tokenType == TokenType.DelimiterChange)
-                    {
-                        if (string.IsNullOrEmpty(value))
-                        {
-                            throw new MustacheException("Empty delimiter at " + scanner.Pos);
-                        }
-
-                        var sp = value.Split(null as string[], StringSplitOptions.RemoveEmptyEntries);
-                        if (sp.Length != 2)
-                        {
-                            throw new MustacheException("Invalid delimiter format at " + scanner.Pos);
-                        }
-
-                        delimiter = new Delimiter { Open = sp[0], Close = sp[1] };
-                    }
-                }
-                else
-                {
-                    ok = scanner.Seek(1);
-                }
-            }
-
-            pushText(scanner.Pos + 1);
-
-            SquashTokens(ref tokens);
-            return NestTokens(tokens);
-        }
-
     }
 }

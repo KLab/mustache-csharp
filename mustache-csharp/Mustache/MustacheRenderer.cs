@@ -68,7 +68,7 @@ namespace Mustache
                         builder.Append(RenderName(token.Name, ctx, false));
                         break;
                     case TokenType.Text:
-                        builder.Append(token.Template, token.TextStartIndex, token.TextLength);
+                        builder.Append(token.Template, token.StartIndex, token.TextLength);
                         break;
                 }
             }
