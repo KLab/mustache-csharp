@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace Mustache
 {
     /// <summary>
-    /// Scan mustache template string
+    /// Mustache template scanner
     /// </summary>
     class MustacheScanner
     {

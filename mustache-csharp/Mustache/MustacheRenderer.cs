@@ -8,6 +8,9 @@ using Mustache.Extension;
 
 namespace Mustache
 {
+    /// <summary>
+    /// Mustache template renderer
+    /// </summary>
     public class MustacheRenderer
     {
         Dictionary<string, List<Token>> Cache = new Dictionary<string, List<Token>>();
