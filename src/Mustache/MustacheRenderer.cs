@@ -136,8 +136,8 @@ namespace Mustache
                 return string.Empty;
             }
 
-            var partial = Partials.GetValueOrDefault(name);
-            if (partial == null)
+            var partial = string.Empty;
+            if (!Partials.TryGetValue(name, out partial))
             {
                 return string.Empty;
             }
