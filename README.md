@@ -4,7 +4,9 @@ Mustache is an implementation of the mustache template engine in C#
 
 ## Installation
 
+```
 TODO :{
+```
 
 ## Usage
 
@@ -22,10 +24,15 @@ See the manual [mustache(5)](https://mustache.github.io/mustache.5.html) for fur
 
 ## Running the tests
 
+Run all tests:
 ```sh
 cd tests/Mustache.Test
 dotnet test
 ```
+
+### spec
+* `spec` directory is copy of https://github.com/mustache/spec
+* `spec/make-csharp.py` generates csharp test codes.
 
 ## Thanks
 
