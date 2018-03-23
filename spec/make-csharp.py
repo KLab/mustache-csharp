@@ -5,14 +5,10 @@ import os
 import re
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-output = os.path.join(script_dir, "Spec.cs")
+output_dir = os.path.join(script_dir, "..", "tests", "Mustache.Test")
 
-ignore_test_cases = (
-    #"TestLambdaLambdasInvertedSection",
-)
-
-def tocstring(name):
-    return "".join(x for x in name.title() if not x.isspace()).replace("-", "").replace("(", "").replace(")", "").replace("~", "Lambda")
+def to_csharp_name(name):
+    return "".join(x for x in name.title() if not x.isspace()).replace("-", "").replace("(", "").replace(")", "").replace("~", "")
 
 def raw_literal(s):
     return '@"' + s.replace('"', '""') + '"'
@@ -110,70 +106,51 @@ for path in glob.glob(os.path.join(script_dir, "specs", "*.json")):
         dirty_fix(obj)
         specs.append(obj)
 
-def render_spec(f, spec):
-    for test in spec["tests"]:
-        test_name = tocstring(spec["name"] + " " + test["name"])
+for spec in specs:
+    class_name = to_csharp_name(spec["name"]) + "Spec"
+    fname = class_name + ".cs"
 
-        template = raw_literal(test["template"])
-        expected = raw_literal(test["expected"])
-        desc = raw_literal(test["desc"])
-
-        f.write("public static void Test" + test_name + "() { \n")
-
-        if test["data"]:
-            if test["name"] == "Interpolation - Multiple Calls":
-                f.write("\tint calls = 0;\n") # :{
-            test_data_name = test_name + "Data"
-            f.write("\tobject data = ")
-            f.write(gen_new_anonymous(test["data"]))
-            f.write(";\n")
-        else:
-            f.write("\tobject data = null;\n")
-
-        if "partials" in test:
-            f.write("\tvar partials = new Dictionary<string, string>() {\n");
-            for key, value in test["partials"].items():
-                f.write("\t\t{" + raw_literal(key) + ", " + raw_literal(value) + "},\n")
-            f.write("\t};\n")
-        else:
-            f.write("\tDictionary<string, string> partials = null;\n")
-
-        f.write("\tvar template = " + template + ";\n")
-        f.write("\tvar expected = " + expected + ";\n")
-        f.write("\tvar actual = new MustacheRenderer().Render(template, data, partials);\n")
-        f.write("\tif (expected != actual) { \n")
-        f.write("\t\tthrow new Exception(" + desc + ");\n")
-        f.write("\t}\n")
-        f.write("}\n")
-
-with open(output, "w") as f:
-    f.write("using System;\n")
-    f.write("using System.Collections.Generic;\n")
-    f.write("using Mustache;\n")
-    f.write("\n")
-    f.write("namespace Mustache.Test {\n")
-    f.write("public static class Specs {\n")
-    for spec in specs:
+    with open(os.path.join(output_dir, fname), "w") as f:
+        f.write("using System;\n")
+        f.write("using System.Collections.Generic;\n")
+        f.write("using Mustache;\n")
+        f.write("using Xunit;\n")
+        f.write("\n")
+        f.write("namespace Mustache.Test {\n")
+        f.write("public class " + class_name + " {\n")
         f.write("/*\n")
         f.write(spec["name"] + "\n\n")
         f.write(spec["overview"])
         f.write("*/\n")
-
-        render_spec(f, spec)
-
-        f.write("\n")
-
-    f.write("public static void RunAllTests() {\n")
-    for spec in specs:
         for test in spec["tests"]:
-            func_name = "Test" + tocstring(spec["name"] + " " + test["name"])
-            # ignored test
-            if func_name in ignore_test_cases:
-                f.write("//")
-            f.write("\t"+func_name + "();\n")
-    f.write("}\n")
-
-
-    f.write("} // class\n")
-    f.write("} // namespace\n")
-
+            test_name = to_csharp_name(spec["name"] + " " + test["name"])
+            template = raw_literal(test["template"])
+            expected = raw_literal(test["expected"])
+            desc = raw_literal(test["desc"])
+            f.write("\n")
+            f.write("[Fact]\n")
+            f.write("public void Test" + test_name + "() { \n")
+            if test["data"]:
+                if test["name"] == "Interpolation - Multiple Calls":
+                    f.write("    int calls = 0;\n") # :{
+                test_data_name = test_name + "Data"
+                f.write("    object data = ")
+                f.write(gen_new_anonymous(test["data"]))
+                f.write(";\n")
+            else:
+                f.write("    object data = null;\n")
+            if "partials" in test:
+                f.write("    var partials = new Dictionary<string, string>() {\n");
+                for key, value in test["partials"].items():
+                    f.write("        {" + raw_literal(key) + ", " + raw_literal(value) + "},\n")
+                f.write("    };\n")
+            else:
+                f.write("    Dictionary<string, string> partials = null;\n")
+            f.write("    var template = " + template + ";\n")
+            f.write("    var expected = " + expected + ";\n")
+            f.write("    var actual = new MustacheRenderer().Render(template, data, partials);\n")
+            f.write("    Assert.Equal(expected, actual);\n")
+            f.write("}\n")
+        f.write("\n")
+        f.write("} // class\n")
+        f.write("} // namespace\n")

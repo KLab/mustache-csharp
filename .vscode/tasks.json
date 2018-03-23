@@ -7,7 +7,17 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/mustache-csharp/mustache-csharp.csproj"
+                "${workspaceFolder}/tests/Mustache.Test/Mustache.Test.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/tests/Mustache.Test/Mustache.Test.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
