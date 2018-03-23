@@ -5,7 +5,7 @@ import os
 import re
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-output_dir = os.path.join(script_dir, "..", "tests", "Mustache.Test")
+output_dir = os.path.join(script_dir, "..")
 
 def to_csharp_name(name):
     return "".join(x for x in name.title() if not x.isspace()).replace("-", "").replace("(", "").replace(")", "").replace("~", "")
