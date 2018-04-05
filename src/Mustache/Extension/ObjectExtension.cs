@@ -118,7 +118,7 @@ namespace Mustache.Extension
             }
             if (self is IConvertible)
             {
-                return Convert.ToBoolean(self as IConvertible);
+                return !Convert.ToBoolean(self as IConvertible);
             }
             if (self is IEnumerable)
             {
