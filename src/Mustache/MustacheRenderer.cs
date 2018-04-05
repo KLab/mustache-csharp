@@ -84,7 +84,7 @@ namespace Mustache
         {
             var value = ctx.Lookup(token.Name);
 
-            if (value.IsFalsey())
+            if (value.ShouldNotRender())
             {
                 return string.Empty;
             }
@@ -121,7 +121,7 @@ namespace Mustache
         {
             var value = ctx.Lookup(token.Name);
 
-            if (value.IsFalsey())
+            if (value.ShouldNotRender())
             {
                 return RenderTokens(ctx, token.Children);
             }
@@ -174,11 +174,12 @@ namespace Mustache
                 var template = value.InvokeNameLambda() as string;
                 var tokens = new MustacheParser().Parse(template, Delimiter.Default());
                 value = RenderTokens(ctx, tokens);
-            }
 
-            if (value.IsFalsey())
-            {
-                return string.Empty;
+                // Recheck for null
+                if (value == null)
+                {
+                    return string.Empty;
+                }
             }
 
             if (escape)
