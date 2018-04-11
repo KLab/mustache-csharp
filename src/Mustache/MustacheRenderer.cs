@@ -19,6 +19,11 @@ namespace Mustache
         public Dictionary<string, string> Partials { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// Enable strict mode
+        /// </summary>
+        public bool StrictMode { get; set; } = false;
+
+        /// <summary>
         /// Parses and applies given template and returns rendered string
         /// </summary>
         /// <param name="template">mustache template string</param>
@@ -94,6 +99,11 @@ namespace Mustache
         {
             var value = ctx.Lookup(token.Name);
 
+            if (value == null && StrictMode)
+            {
+                throw new MustacheException(string.Format("lookup failed name:{0}", token.Name));
+            }
+
             if (value.ShouldNotRender())
             {
                 return string.Empty;
@@ -130,6 +140,11 @@ namespace Mustache
         string RenderInverted(Token token, MustacheContext ctx)
         {
             var value = ctx.Lookup(token.Name);
+
+            if (value == null && StrictMode)
+            {
+                throw new MustacheException(string.Format("lookup failed name:{0}", token.Name));
+            }
 
             if (value.ShouldNotRender())
             {
@@ -173,6 +188,11 @@ namespace Mustache
         string RenderName(string name, MustacheContext ctx, bool escape)
         {
             var value = ctx.Lookup(name);
+
+            if (value == null && StrictMode)
+            {
+                throw new MustacheException(string.Format("lookup failed name:{0}", name));
+            }
 
             if (value == null)
             {
