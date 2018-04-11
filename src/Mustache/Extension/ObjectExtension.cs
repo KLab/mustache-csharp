@@ -98,16 +98,38 @@ namespace Mustache.Extension
         /// </summary>
         /// <param name="self">object instance</param>
         /// <returns>true if this is a false like value</returns>
-        public static bool IsFalsey(this object self)
+        public static bool ShouldNotRender(this object self)
         {
-            if (self == null) return true;
-            if (self is int || self is long || self is float || self is double) return false;
-            if (self is bool) return !(bool)self;
-            if (self is string) return (self as string).Length == 0;
-            if (self is ICollection) return (self as ICollection).Count == 0;
-            if (self is IEnumerable) return !(self as IEnumerable).GetEnumerator().MoveNext();
-            // FIXME:{ < how to detect anonymous empty value more smartly. 
-            if (self.ToString() == "{ }") return true;
+            if (self == null)
+            {
+                return true;
+            }
+            if (self is IMustacheRenderFilter)
+            {
+                return !(self as IMustacheRenderFilter).ShouldRender;
+            }
+            if (self is bool)
+            {
+                return !(bool)self;
+            }
+            if (self is string)
+            {
+                return string.IsNullOrEmpty(self as String);
+            }
+            if (self is IConvertible)
+            {
+                return !Convert.ToBoolean(self as IConvertible);
+            }
+            if (self is IEnumerable)
+            {
+                return !(self as IEnumerable).GetEnumerator().MoveNext();
+            }
+            // INV { < How to detect anonymous empty value smarter? 
+            if (self.ToString() == "{ }")
+            {
+                return true;
+            }
+
             return false;
         }
     }
