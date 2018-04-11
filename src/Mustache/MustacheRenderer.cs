@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Mustache.Extension;
 
 namespace Mustache
 {
@@ -13,8 +11,12 @@ namespace Mustache
     /// </summary>
     public class MustacheRenderer
     {
-        Dictionary<string, List<Token>> Cache = new Dictionary<string, List<Token>>();
-        Dictionary<string, string> Partials;
+        Dictionary<string, List<Token>> Cache { get; set; } = new Dictionary<string, List<Token>>();
+
+        /// <summary>
+        /// Partial templates
+        /// </summary>
+        public Dictionary<string, string> Partials { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Parse and apply the template and returns rendered string

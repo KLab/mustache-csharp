@@ -12,12 +12,12 @@ namespace Mustache
         /// <summary>
         /// Left-side delimiter
         /// </summary>
-        public string Open;
+        public string Open { get; set; }
 
         /// <summary>
         /// Right-side delimiter
         /// </summary>
-        public string Close;
+        public string Close { get; set; }
 
         /// <summary>
         /// Returns default mustache delimiter
@@ -53,57 +53,57 @@ namespace Mustache
         /// <summary>
         /// Original template
         /// </summary>
-        public string Template;
+        public string Template { get; set; }
 
         /// <summary>
         /// Starting index of this token in the Template
         /// </summary>
-        public int StartIndex;
+        public int StartIndex { get; set; }
 
         /// <summary>
         /// Token type
         /// </summary>
-        public TokenType Type;
+        public TokenType Type { get; set; }
 
         /// <summary>
         /// Variable tag name
         /// </summary>
-        public string Name;
+        public string Name { get; set; }
 
         /// <summary>
         /// Witespaces of standalone partial tag
         /// </summary>
-        public string PartialIndent;
+        public string PartialIndent { get; set; }
 
         /// <summary>
         /// Child tokens of this token.
         /// </summary>
-        public List<Token> Children;
+        public List<Token> Children { get; set; }
 
         /// <summary>
         /// Whether this token appeared at the beginning of line or not
         /// </summary>
-        public bool IsBol;
+        public bool IsBol { get; set; }
 
         /// <summary>
         /// Number of characters in this text token
         /// </summary>
-        public int TextLength;
+        public int TextLength { get; set; }
 
         /// <summary>
         /// Starting index of this section in the Template
         /// </summary>
-        public int SectionStartIndex;
+        public int SectionStartIndex { get; set; }
 
         /// <summary>
         /// Ending index of this section in the Template
         /// </summary>
-        public int SectionEndIndex;
+        public int SectionEndIndex { get; set; }
 
         /// <summary>
         /// Delimiter used when this token parsed
         /// </summary>
-        public Delimiter CurrentDelimiter;
+        public Delimiter CurrentDelimiter { get; set; }
 
         /// <summary>
         /// Returns contents of text token
@@ -303,7 +303,7 @@ namespace Mustache
             }
         }
 
-        static readonly HashSet<string> ProhibitedWords = new HashSet<string>()
+        static HashSet<string> ProhibitedWords { get; } = new HashSet<string>()
         {
             "abstract", "as", "base", "bool", "break", "byte", "case", "catch",
             "char", "checked", "class", "const", "continue", "decimal", "default",
@@ -395,6 +395,7 @@ namespace Mustache
                 tokens.RemoveAt(removes[i]);
             }
         }
+
         List<Token> NestTokens(List<Token> tokens)
         {
             var root = new List<Token>();
