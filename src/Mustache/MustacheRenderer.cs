@@ -78,13 +78,13 @@ namespace Mustache
                         builder.Append(RenderInverted(token, ctx));
                         break;
                     case TokenType.Partial:
-                        builder.Append(RenderPartial(token.Name, ctx, token.PartialIndent));
+                        builder.Append(RenderPartial(token, ctx, token.PartialIndent));
                         break;
                     case TokenType.Variable:
-                        builder.Append(RenderName(token.Name, ctx, true));
+                        builder.Append(RenderName(token, ctx, true));
                         break;
                     case TokenType.UnescapedVariable:
-                        builder.Append(RenderName(token.Name, ctx, false));
+                        builder.Append(RenderName(token, ctx, false));
                         break;
                     case TokenType.Text:
                         builder.Append(token.Template, token.StartIndex, token.TextLength);
@@ -101,7 +101,7 @@ namespace Mustache
 
             if (value == null && StrictMode)
             {
-                throw new MustacheException(string.Format("lookup failed name:{0}", token.Name));
+                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.AroundTemplate));
             }
 
             if (value.ShouldNotRender())
@@ -143,7 +143,7 @@ namespace Mustache
 
             if (value == null && StrictMode)
             {
-                throw new MustacheException(string.Format("lookup failed name:{0}", token.Name));
+                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.AroundTemplate));
             }
 
             if (value.ShouldNotRender())
@@ -154,8 +154,10 @@ namespace Mustache
             return string.Empty;
         }
 
-        string RenderPartial(string name, MustacheContext ctx, string indent)
+        string RenderPartial(Token token, MustacheContext ctx, string indent)
         {
+            string name = token.Name;
+
             if (Partials == null)
             {
                 return string.Empty;
@@ -185,13 +187,13 @@ namespace Mustache
             return RenderTokens(ctx, Cache[key]);
         }
 
-        string RenderName(string name, MustacheContext ctx, bool escape)
+        string RenderName(Token token, MustacheContext ctx, bool escape)
         {
-            var value = ctx.Lookup(name);
+            var value = ctx.Lookup(token.Name);
 
             if (value == null && StrictMode)
             {
-                throw new MustacheException(string.Format("lookup failed name:{0}", name));
+                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.AroundTemplate));
             }
 
             if (value == null)

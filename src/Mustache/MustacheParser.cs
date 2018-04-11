@@ -106,6 +106,20 @@ namespace Mustache
         public Delimiter CurrentDelimiter { get; set; }
 
         /// <summary>
+        /// Returns around text for debugging
+        /// </summary>
+        /// <returns>substring of original template around this token</returns>
+        public string AroundTemplate
+        {
+            get
+            {
+                var start = Math.Max(0, StartIndex - 70);
+                var end = Math.Min(Template.Length, StartIndex + 80);
+                return Template.Substring(start, end - start);
+            }
+        }
+
+        /// <summary>
         /// Returns contents of text token
         /// </summary>
         /// <returns>Contents of text token</returns>
