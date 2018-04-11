@@ -182,12 +182,19 @@ namespace Mustache
                 }
             }
 
-            if (escape)
+            var s = value.ToString();
+
+            if (s == "{ }")
             {
-                return System.Web.HttpUtility.HtmlEncode(value.ToString());
+                return string.Empty;
             }
 
-            return value.ToString();
+            if (escape)
+            {
+                return System.Web.HttpUtility.HtmlEncode(s);
+            }
+
+            return s;
         }
     }
 }
