@@ -62,21 +62,16 @@ namespace Mustache
 
                         foreach (var s in name.Split('.'))
                         {
-                            var v = value.GetValue(s);
-                            if (v != null)
+                            value = value.GetValue(s);
+                            if (value == null)
                             {
-                                value = v;
-                                continue;
+                                break;
                             }
                         }
                     }
                     else
                     {
-                        var v = ctx.Data.GetValue(name);
-                        if (v != null)
-                        {
-                            value = v;
-                        }
+                        value = ctx.Data.GetValue(name);
                     }
 
                     if (value != null)
