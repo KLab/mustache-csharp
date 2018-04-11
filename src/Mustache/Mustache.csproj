@@ -9,6 +9,6 @@
     <Content Include="MustacheParser.cs" />
     <Content Include="MustacheRenderer.cs" />
     <Content Include="MustacheScanner.cs" />
-    <Content Include="Extension\ObjectExtension.cs" />
+    <Content Include="ObjectExtension.cs" />
   </ItemGroup>
 </Project>

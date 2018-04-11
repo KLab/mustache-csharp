@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Mustache.Extension;
 
 namespace Mustache
 {
@@ -9,9 +7,8 @@ namespace Mustache
     /// </summary>
     public class MustacheContext
     {
-        object Data;
-        MustacheContext Parent;
-        Dictionary<string, object> Cache;
+        object Data { get; set; }
+        MustacheContext Parent { get; set; }
 
         /// <summary>
         /// Initialize context
@@ -22,7 +19,6 @@ namespace Mustache
         {
             Data = data;
             Parent = parent;
-            Cache = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -41,11 +37,6 @@ namespace Mustache
             if (name.Trim() == string.Empty)
             {
                 throw new ArgumentException("empty name", "name");
-            }
-
-            if (Cache.ContainsKey(name))
-            {
-                return Cache[name];
             }
 
             if (Data == null)

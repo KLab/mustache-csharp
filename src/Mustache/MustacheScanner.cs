@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-
-namespace Mustache
+﻿namespace Mustache
 {
     /// <summary>
     /// Mustache template scanner
