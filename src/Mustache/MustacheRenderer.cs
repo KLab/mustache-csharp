@@ -9,7 +9,7 @@ namespace Mustache
     /// <summary>
     /// Mustache template renderer
     /// </summary>
-    public class MustacheRenderer
+    public class MustacheRenderer : IDisposable
     {
         Dictionary<string, List<Token>> Cache { get; set; } = new Dictionary<string, List<Token>>();
 
@@ -19,13 +19,13 @@ namespace Mustache
         public Dictionary<string, string> Partials { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
-        /// Parse and apply the template and returns rendered string
+        /// Parses and applies given template and returns rendered string
         /// </summary>
         /// <param name="template">mustache template string</param>
         /// <param name="data">data object</param>
         /// <param name="partials">partial templates</param>
         /// <returns>rendered string</returns>
-        public string Render(string template, object data, Dictionary<string, string> partials)
+        public string Render(string template, object data, Dictionary<string, string> partials = null)
         {
             if (template == null)
             {
@@ -48,6 +48,14 @@ namespace Mustache
             }
 
             return RenderTokens(new MustacheContext(data, null), Cache[template]);
+        }
+
+        /// <summary>
+        /// Removes all parsed tokens
+        /// </summary>
+        public void ClearCache()
+        {
+            Cache.Clear();
         }
 
         string RenderTokens(MustacheContext ctx, List<Token> tokens)
@@ -198,5 +206,28 @@ namespace Mustache
 
             return s;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Cache = null;
+                    Partials = null;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }
