@@ -333,11 +333,11 @@ public void TestSectionsIndentedStandaloneLines() {
 public void TestSectionsStandaloneLineEndings() { 
     object data = new {boolean = true, };
     Dictionary<string, string> partials = null;
-    var template = @"|
-{{#boolean}}
-{{/boolean}}
+    var template = @"|
+{{#boolean}}
+{{/boolean}}
 |";
-    var expected = @"|
+    var expected = @"|
 |";
     var actual = new MustacheRenderer().Render(template, data, partials);
     Assert.Equal(expected, actual);

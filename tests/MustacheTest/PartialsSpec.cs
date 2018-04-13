@@ -105,10 +105,10 @@ public void TestPartialsStandaloneLineEndings() {
     var partials = new Dictionary<string, string>() {
         {@"partial", @">"},
     };
-    var template = @"|
-{{>partial}}
+    var template = @"|
+{{>partial}}
 |";
-    var expected = @"|
+    var expected = @"|
 >|";
     var actual = new MustacheRenderer().Render(template, data, partials);
     Assert.Equal(expected, actual);

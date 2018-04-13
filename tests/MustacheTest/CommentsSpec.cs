@@ -76,10 +76,10 @@ End.
 public void TestCommentsStandaloneLineEndings() { 
     object data = null;
     Dictionary<string, string> partials = null;
-    var template = @"|
-{{! Standalone Comment }}
+    var template = @"|
+{{! Standalone Comment }}
 |";
-    var expected = @"|
+    var expected = @"|
 |";
     var actual = new MustacheRenderer().Render(template, data, partials);
     Assert.Equal(expected, actual);

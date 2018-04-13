@@ -185,10 +185,10 @@ End.
 public void TestDelimitersStandaloneLineEndings() { 
     object data = null;
     Dictionary<string, string> partials = null;
-    var template = @"|
-{{= @ @ =}}
+    var template = @"|
+{{= @ @ =}}
 |";
-    var expected = @"|
+    var expected = @"|
 |";
     var actual = new MustacheRenderer().Render(template, data, partials);
     Assert.Equal(expected, actual);

@@ -254,11 +254,11 @@ public void TestInvertedStandaloneIndentedLines() {
 public void TestInvertedStandaloneLineEndings() { 
     object data = new {boolean = false, };
     Dictionary<string, string> partials = null;
-    var template = @"|
-{{^boolean}}
-{{/boolean}}
+    var template = @"|
+{{^boolean}}
+{{/boolean}}
 |";
-    var expected = @"|
+    var expected = @"|
 |";
     var actual = new MustacheRenderer().Render(template, data, partials);
     Assert.Equal(expected, actual);
