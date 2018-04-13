@@ -7,29 +7,29 @@ using System.Text.RegularExpressions;
 namespace Mustache
 {
     /// <summary>
-    /// Mustache template renderer
+    /// Mustache template renderer.
     /// </summary>
     public class MustacheRenderer : IDisposable
     {
         Dictionary<string, List<Token>> Cache { get; set; } = new Dictionary<string, List<Token>>();
 
         /// <summary>
-        /// Partial templates
+        /// Partial templates.
         /// </summary>
         public Dictionary<string, string> Partials { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
-        /// Enable strict mode
+        /// Enable strict mode.
         /// </summary>
         public bool StrictMode { get; set; } = false;
 
         /// <summary>
-        /// Parses and applies given template and returns rendered string
+        /// Parses and applies given template and returns rendered string.
         /// </summary>
-        /// <param name="template">mustache template string</param>
-        /// <param name="data">data object</param>
-        /// <param name="partials">partial templates</param>
-        /// <returns>rendered string</returns>
+        /// <param name="template">Mustache template string.</param>
+        /// <param name="data">Data object.</param>
+        /// <param name="partials">Partial templates.</param>
+        /// <returns>Rendered string.</returns>
         public string Render(string template, object data, Dictionary<string, string> partials = null)
         {
             if (template == null)
@@ -56,7 +56,7 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Removes all parsed tokens
+        /// Removes all parsed tokens.
         /// </summary>
         public void ClearCache()
         {
@@ -101,7 +101,7 @@ namespace Mustache
 
             if (value == null && StrictMode)
             {
-                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.AroundTemplate));
+                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.SurroundingTemplate));
             }
 
             if (value.ShouldNotRender())
@@ -143,7 +143,7 @@ namespace Mustache
 
             if (value == null && StrictMode)
             {
-                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.AroundTemplate));
+                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.SurroundingTemplate));
             }
 
             if (value.ShouldNotRender())
@@ -193,7 +193,7 @@ namespace Mustache
 
             if (value == null && StrictMode)
             {
-                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.AroundTemplate));
+                throw new MustacheException(string.Format("lookup failed name:'{0}' around:\n...{1}...\n", token.Name, token.SurroundingTemplate));
             }
 
             if (value == null)
