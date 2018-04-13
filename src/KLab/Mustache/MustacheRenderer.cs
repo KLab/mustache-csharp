@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Mustache
+namespace KLab.Mustache
 {
     /// <summary>
     /// Mustache template renderer.

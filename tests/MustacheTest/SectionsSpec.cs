@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Mustache;
+using KLab.Mustache;
 using Xunit;
 
-namespace Mustache.Test {
+namespace MustacheTest {
 public class SectionsSpec {
 /*
 sections

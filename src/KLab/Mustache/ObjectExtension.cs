@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Collections;
 
-namespace Mustache
+namespace KLab.Mustache
 {
     /// <summary>
     /// The object type extension class.

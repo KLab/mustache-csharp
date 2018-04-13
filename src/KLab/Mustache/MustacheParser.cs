@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
-namespace Mustache
+namespace KLab.Mustache
 {
     /// <summary>
     /// Holds delimiter string pair.

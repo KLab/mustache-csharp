@@ -5,7 +5,7 @@ import os
 import re
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-output_dir = os.path.join(script_dir, "..", "tests", "Mustache.Test")
+output_dir = os.path.join(script_dir, "..", "tests", "MustacheTest")
 
 def to_csharp_name(name):
     return "".join(x for x in name.title() if not x.isspace()).replace("-", "").replace("(", "").replace(")", "").replace("~", "")
@@ -110,13 +110,13 @@ for spec in specs:
     class_name = to_csharp_name(spec["name"]) + "Spec"
     fname = class_name + ".cs"
 
-    with open(os.path.join(output_dir, fname), "w") as f:
+    with open(os.path.join(output_dir, fname), "w", newline="") as f:
         f.write("using System;\n")
         f.write("using System.Collections.Generic;\n")
-        f.write("using Mustache;\n")
+        f.write("using KLab.Mustache;\n")
         f.write("using Xunit;\n")
         f.write("\n")
-        f.write("namespace Mustache.Test {\n")
+        f.write("namespace MustacheTest {\n")
         f.write("public class " + class_name + " {\n")
         f.write("/*\n")
         f.write(spec["name"] + "\n\n")
