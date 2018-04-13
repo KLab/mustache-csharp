@@ -113,10 +113,10 @@ for spec in specs:
     with open(os.path.join(output_dir, fname), "w") as f:
         f.write("using System;\n")
         f.write("using System.Collections.Generic;\n")
-        f.write("using Mustache;\n")
+        f.write("using KLab.Mustache;\n")
         f.write("using Xunit;\n")
         f.write("\n")
-        f.write("namespace Mustache.Test {\n")
+        f.write("namespace MustacheTest {\n")
         f.write("public class " + class_name + " {\n")
         f.write("/*\n")
         f.write(spec["name"] + "\n\n")

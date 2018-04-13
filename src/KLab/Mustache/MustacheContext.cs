@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Mustache
+namespace KLab.Mustache
 {
     /// <summary>
     /// MustacheContext holds the data associated with template.

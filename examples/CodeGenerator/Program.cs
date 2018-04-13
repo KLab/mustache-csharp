@@ -4,13 +4,13 @@
  */
 
 
-using CodeGenerationUtilities;
-using Mustache;
+using KLab.CodeGenerationUtilities;
+using KLab.Mustache;
 using System;
 using System.Linq;
 
 
-namespace CodeGenerator
+namespace KLab.CodeGenerator
 {
     /// <summary>
     /// Interface to generate implementation of

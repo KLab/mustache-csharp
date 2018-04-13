@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CodeGenerationUtilities\CodeGenerationUtilities.csproj" />
-    <ProjectReference Include="..\..\src\Mustache\Mustache.csproj" />
+    <ProjectReference Include="..\..\src\KLab\CodeGenerationUtilities\CodeGenerationUtilities.csproj" />
+    <ProjectReference Include="..\..\src\KLab\Mustache\Mustache.csproj" />
   </ItemGroup>
 
 </Project>

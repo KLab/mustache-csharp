@@ -1,4 +1,4 @@
-﻿namespace Mustache
+﻿namespace KLab.Mustache
 {
     /// <summary>
     /// Allows control over whether a section is rendered or not.

@@ -1,4 +1,4 @@
-﻿namespace Mustache
+﻿namespace KLab.Mustache
 {
     /// <summary>
     /// Mustache template scanner class.
