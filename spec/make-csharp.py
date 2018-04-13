@@ -110,7 +110,7 @@ for spec in specs:
     class_name = to_csharp_name(spec["name"]) + "Spec"
     fname = class_name + ".cs"
 
-    with open(os.path.join(output_dir, fname), "w", newline="\n") as f:
+    with open(os.path.join(output_dir, fname), "w", newline="") as f:
         f.write("using System;\n")
         f.write("using System.Collections.Generic;\n")
         f.write("using KLab.Mustache;\n")
