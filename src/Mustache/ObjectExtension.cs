@@ -93,7 +93,7 @@ namespace Mustache
         /// Check this object is a supported lambda types.
         /// </summary>
         /// <param name="self">The object instance.</param>
-        /// <returns><c>true</c> if this is a supported lambda type otherwise <c>true</c>.</returns>
+        /// <returns><see langword="true"/> if this is a supported lambda type otherwise <see langword="false"/>.</returns>
         public static bool IsLambda(this object self)
         {
             return
@@ -107,7 +107,7 @@ namespace Mustache
         /// Check this object is a false like value.
         /// </summary>
         /// <param name="self">The object instance.</param>
-        /// <returns><c>true</c> if this is a false like value.</returns>
+        /// <returns><see langword="true"/> if this is a false like value otherwise <see langword="false"/>.</returns>
         public static bool ShouldNotRender(this object self)
         {
             if (self == null)
