@@ -3,7 +3,7 @@
 namespace Mustache
 {
     /// <summary>
-    /// Mustache Context
+    /// MustacheContext holds the data associated with template.
     /// </summary>
     public class MustacheContext
     {
@@ -11,10 +11,10 @@ namespace Mustache
         MustacheContext Parent { get; set; }
 
         /// <summary>
-        /// Initialize context
+        /// Initialize.
         /// </summary>
-        /// <param name="data">the data associated with this context</param>
-        /// <param name="parent">parent context</param>
+        /// <param name="data">The data to be associated with this context.</param>
+        /// <param name="parent">Parent context.</param>
         public MustacheContext(object data, MustacheContext parent)
         {
             Data = data;
@@ -22,11 +22,11 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Find the name key in the current context.
+        /// Finds the name key in the current context and returns the value.
         /// If there is no name key, the parent contexts will be checked recursively.
         /// </summary>
-        /// <param name="name">the name key</param>
-        /// <returns>associated data</returns>
+        /// <param name="name">The name key.</param>
+        /// <returns>Found data.</returns>
         public object Lookup(string name)
         {
             if (name == null)
@@ -36,7 +36,7 @@ namespace Mustache
 
             if (name.Trim() == string.Empty)
             {
-                throw new ArgumentException("empty name", "name");
+                throw new ArgumentException("Empty name", "name");
             }
 
             if (Data == null)
