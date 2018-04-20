@@ -1,6 +1,6 @@
-# Mustache
+# MustacheC#
 
-Mustache is an implementation of the mustache template engine in C#
+MustacheC# is an implementation of the mustache template engine in C#
 
 ## Installation
 
@@ -31,7 +31,7 @@ dotnet test
 ```
 
 ### spec
-* `spec` directory is copy of https://github.com/mustache/spec
+* `spec` directory is a copy of https://github.com/mustache/spec
 * `spec/make-csharp.py` generates csharp test codes.
 
 ## Thanks
