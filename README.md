@@ -5,19 +5,17 @@ MustacheC# is an implementation of the mustache template engine in C#
 ## Installation
 
 ```
-TODO :{
+NuGet package is coming soon.
 ```
 
 ## Usage
 
 Quick Example:
 ```csharp
-object data = new {
-  subject = "world"
-};
+object data = new { subject = "world" };
 var template = "Hello, {{subject}}!";
-var actual = new MustacheRenderer().Render(template, data, null);
-console.WriteLine(actual); // => "Hello world!"
+var result = new MustacheRenderer().Render(template, data);
+console.WriteLine(result); // => "Hello world!"
 ```
 
 See the manual [mustache(5)](https://mustache.github.io/mustache.5.html) for further information.

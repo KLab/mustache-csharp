@@ -1,38 +1,38 @@
-﻿namespace Mustache
+﻿namespace KLab.Mustache
 {
     /// <summary>
-    /// Mustache template scanner
+    /// Mustache template scanner class.
     /// </summary>
     class MustacheScanner
     {
         /// <summary>
-        /// Target template
+        /// Target template.
         /// </summary>
-        /// <returns>mustache template string</returns>
+        /// <returns>Mustache template string.</returns>
         public string Source { get; private set; }
 
         /// <summary>
-        /// Current reading position
+        /// Current reading position.
         /// </summary>
-        /// <returns>current reading position</returns>
+        /// <returns>Current reading position.</returns>
         public int Pos { get; private set; }
 
         /// <summary>
-        /// Initialize MustacheScanner
+        /// Constructor.
         /// </summary>
-        /// <param name="str">mustache template string</param>
-        public MustacheScanner(string str)
+        /// <param name="str">Mustache template string.</param>
+        public MustacheScanner(string template)
         {
-            Source = str;
+            Source = template;
             Pos = 0;
         }
 
         /// <summary>
-        /// Return the character at relative offset
-        /// Current position is not changed
+        /// Returns the character at relative offset.
+        /// Current position is not changed.
         /// </summary>
-        /// <param name="offset">relative offset</param>
-        /// <returns>the character at the position, or 0 if position is out of range</returns>
+        /// <param name="offset">Relative offset.</param>
+        /// <returns>The character at the position, or 0 if calculated position is out of range.</returns>
         public char Peek(int offset)
         {
             var p = Pos + offset;
@@ -44,35 +44,35 @@
         }
 
         /// <summary>
-        /// Return the character at current position
+        /// Returns the character at current position.
         /// </summary>
-        /// <returns>the character at current position</returns>
+        /// <returns>The character at current position.</returns>
         public char Peek()
         {
             return Peek(0);
         }
 
         /// <summary>
-        /// Update current position
+        /// Moves current position.
         /// </summary>
-        /// <param name="offset">offset that relative to the current position</param>
-        /// <returns>true if position was updated otherwise false</returns>
+        /// <param name="offset">Offset that relative to the current position.</param>
+        /// <returns><see langword="true"/> if position was updated otherwise <see langword="false"/></returns>
         public bool Seek(int offset)
         {
             var p = Pos + offset;
             if (0 <= p && p < Source.Length)
             {
-                Pos += offset;
+                Pos = p;
                 return true;
             }
             return false;
         }
 
         /// <summary>
-        /// Read util just before the pattern found
+        /// Reads until just before the pattern found.
         /// </summary>
-        /// <param name="pattern">a pattern string to find</param>
-        /// <returns>read string</returns>
+        /// <param name="pattern">A pattern to find.</param>
+        /// <returns>Read string</returns>
         public string ReadUntilJustBefore(string pattern)
         {
             var prev = Pos;
@@ -92,10 +92,10 @@
         }
 
         /// <summary>
-        /// Seek util just before the pattern found
+        /// Seek until just before the pattern found.
         /// </summary>
-        /// <param name="pattern">a pattern string to find</param>
-        /// <returns>moved offset</returns>
+        /// <param name="pattern">A pattern to find.</param>
+        /// <returns>Moved offset</returns>
         public int SeekUntilJustBefore(string pattern)
         {
             var prev = Pos;
@@ -110,10 +110,10 @@
         }
 
         /// <summary>
-        /// Check if current position starts with the pattern
+        /// Check if current position starts with the pattern.
         /// </summary>
-        /// <param name="pattern">a pattern string to check</param>
-        /// <returns>true if it starts with the pattern otherwise false</returns>
+        /// <param name="pattern">A pattern string to check.</param>
+        /// <returns><see langword="true"/> if it starts with the pattern otherwise <see langword="false"/></returns>
         public bool StartsWith(string pattern)
         {
             for (int i = 0; i < pattern.Length; ++i)

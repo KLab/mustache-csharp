@@ -7,7 +7,7 @@ using System;
 using System.Linq;
 
 
-namespace CodeGenerationUtilities
+namespace KLab.CodeGenerationUtilities
 {
     /// <summary>
     /// <see cref="Type"/> extension methods

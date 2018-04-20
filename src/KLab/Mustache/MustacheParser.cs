@@ -2,27 +2,27 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
-namespace Mustache
+namespace KLab.Mustache
 {
     /// <summary>
-    /// Holds delimiter strings
+    /// Holds delimiter string pair.
     /// </summary>
     public struct Delimiter
     {
         /// <summary>
-        /// Left-side delimiter
+        /// The Left-side delimiter.
         /// </summary>
         public string Open { get; set; }
 
         /// <summary>
-        /// Right-side delimiter
+        /// The Right-side delimiter.
         /// </summary>
         public string Close { get; set; }
 
         /// <summary>
-        /// Returns default mustache delimiter
+        /// Returns default mustache delimiter.
         /// </summary>
-        /// <returns>Default mustache delimiter</returns>
+        /// <returns>Default mustache delimiter.</returns>
         public static Delimiter Default()
         {
             return new Delimiter { Open = "{{", Close = "}}" };
@@ -30,7 +30,7 @@ namespace Mustache
     }
 
     /// <summary>
-    /// Token types
+    /// Token types.
     /// </summary>
     public enum TokenType
     {
@@ -46,32 +46,32 @@ namespace Mustache
     }
 
     /// <summary>
-    /// Holds part of parsed template
+    /// Holds part of parsed template.
     /// </summary>
     public class Token
     {
         /// <summary>
-        /// Original template
+        /// The entire template.
         /// </summary>
         public string Template { get; set; }
 
         /// <summary>
-        /// Starting index of this token in the Template
+        /// Starting index of this token in the Template.
         /// </summary>
         public int StartIndex { get; set; }
 
         /// <summary>
-        /// Token type
+        /// Token type.
         /// </summary>
         public TokenType Type { get; set; }
 
         /// <summary>
-        /// Variable tag name
+        /// Variable tag name.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Witespaces of standalone partial tag
+        /// Witespaces of standalone partial tag.
         /// </summary>
         public string PartialIndent { get; set; }
 
@@ -81,48 +81,50 @@ namespace Mustache
         public List<Token> Children { get; set; }
 
         /// <summary>
-        /// Whether this token appeared at the beginning of line or not
+        /// Whether this token appeared at the beginning of line or not.
         /// </summary>
         public bool IsBol { get; set; }
 
         /// <summary>
-        /// Number of characters in this text token
+        /// Number of characters in this text token.
         /// </summary>
         public int TextLength { get; set; }
 
         /// <summary>
-        /// Starting index of this section in the Template
+        /// Starting index of this section in the Template.
         /// </summary>
         public int SectionStartIndex { get; set; }
 
         /// <summary>
-        /// Ending index of this section in the Template
+        /// Ending index of this section in the Template.
         /// </summary>
         public int SectionEndIndex { get; set; }
 
         /// <summary>
-        /// Delimiter used when this token parsed
+        /// Delimiter used when this token parsed.
         /// </summary>
         public Delimiter CurrentDelimiter { get; set; }
 
         /// <summary>
-        /// Returns around text for debugging
+        /// Returns the surrounding template.
         /// </summary>
-        /// <returns>substring of original template around this token</returns>
-        public string AroundTemplate
+        /// <returns>Substring of original template around this token.</returns>
+        public string SurroundingTemplate
         {
             get
             {
-                var start = Math.Max(0, StartIndex - 70);
-                var end = Math.Min(Template.Length, StartIndex + 80);
+                const int leftPeekOffset = 70;
+                const int rightPeekOffset = 80;
+                var start = Math.Max(0, StartIndex - leftPeekOffset);
+                var end = Math.Min(Template.Length, StartIndex + rightPeekOffset);
                 return Template.Substring(start, end - start);
             }
         }
 
         /// <summary>
-        /// Returns contents of text token
+        /// Returns contents of this text token.
         /// </summary>
-        /// <returns>Contents of text token</returns>
+        /// <returns>Contents of this text token.</returns>
         public string Text
         {
             get
@@ -137,9 +139,9 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Returns raw text block of this section
+        /// Returns raw text block of this section.
         /// </summary>
-        /// <returns>Raw text block of this section</returns>
+        /// <returns>Raw text block of this section.</returns>
         public string SectionTemplate
         {
             get
@@ -150,16 +152,16 @@ namespace Mustache
     }
 
     /// <summary>
-    /// Mustache parser
+    /// Mustache parser.
     /// </summary>
     public class MustacheParser
     {
         /// <summary>
-        /// Parses a single mustache template string and returns the corresponding tokens
+        /// Parses given template and returns the corresponding tokens.
         /// </summary>
-        /// <param name="template">the mustache template string</param>
-        /// <param name="delimiter">the delimiter</param>
-        /// <returns>corresponding tokens</returns>
+        /// <param name="template">The mustache template string</param>
+        /// <param name="delimiter">The delimiter.</param>
+        /// <returns>Corresponding tokens.</returns>
         public List<Token> Parse(string template, Delimiter delimiter)
         {
             var scanner = new MustacheScanner(template);

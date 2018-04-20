@@ -1,21 +1,21 @@
 using System;
 
-namespace Mustache
+namespace KLab.Mustache
 {
     /// <summary>
-    /// Mustache exception type
+    /// Mustache exception.
     /// </summary>
     public class MustacheException : Exception
     {
         /// <summary>
-        /// Initialize
+        /// Initialize.
         /// </summary>
         public MustacheException()
         {
         }
 
         /// <summary>
-        /// Initialize with message
+        /// Initialize with message.
         /// </summary>
         /// <param name="message">exception message</param>
         public MustacheException(string message)
@@ -24,7 +24,7 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Initialize with message and inner
+        /// Initialize with message and inner.
         /// </summary>
         /// <param name="message">exception message</param>
         /// <param name="inner">inner exception</param>

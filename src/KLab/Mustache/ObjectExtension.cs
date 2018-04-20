@@ -2,19 +2,19 @@
 using System.Reflection;
 using System.Collections;
 
-namespace Mustache
+namespace KLab.Mustache
 {
     /// <summary>
-    /// Object type extensions
+    /// The object type extension class.
     /// </summary>
     static class ObjectExtension
     {
         /// <summary>
-        /// get field value by reflection
+        /// Gets field value by name.
         /// </summary>
-        /// <param name="self">object instance</param>
-        /// <param name="name">field name</param>
-        /// <returns>field value</returns>
+        /// <param name="self">Target object.</param>
+        /// <param name="name">Field name.</param>
+        /// <returns>Field value.</returns>
         public static object GetFieldValue(this object self, string name)
         {
             var f = self.GetType().GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
@@ -26,11 +26,11 @@ namespace Mustache
         }
 
         /// <summary>
-        /// get property value by reflection
+        /// Gets property value by name.
         /// </summary>
-        /// <param name="self">object instance</param>
-        /// <param name="name">property name</param>
-        /// <returns>property value</returns>
+        /// <param name="self">Target object.</param>
+        /// <param name="name">Property name.</param>
+        /// <returns>Property value.</returns>
         public static object GetPropertyValue(this object self, string name)
         {
             var p = self.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
@@ -42,11 +42,11 @@ namespace Mustache
         }
 
         /// <summary>
-        /// get field or property value
+        /// Gets field value or property value by name.
         /// </summary>
-        /// <param name="self">object instance</param>
-        /// <param name="name">name</param>
-        /// <returns>the value</returns>
+        /// <param name="self">Target object.</param>
+        /// <param name="name">Field or property name.</param>
+        /// <returns>The value.</returns>
         public static object GetValue(this object self, string name)
         {
             var f = self.GetFieldValue(name);
@@ -65,10 +65,10 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Invoke this delegate without any arguments
+        /// Invoke this delegate without any arguments.
         /// </summary>
-        /// <param name="self">object instance</param>
-        /// <returns>the value this delegate returned</returns>
+        /// <param name="self">Lambda type object.</param>
+        /// <returns>The value this lambda returned.</returns>
         public static object InvokeNameLambda(this object self)
         {
             if (self is Func<string>) return (self as Func<string>)();
@@ -77,11 +77,11 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Invoke this delegate with template argument
+        /// Invoke this delegate with template argument.
         /// </summary>
-        /// <param name="self">object instance</param>
-        /// <param name="template">string to pass lambda</param>
-        /// <returns>the value this delegate returned</returns>
+        /// <param name="self">Lambda type object.</param>
+        /// <param name="template">The template string to pass to this lambda.</param>
+        /// <returns>The value this lambda returned.</returns>
         public static object InvokeSectionLambda(this object self, string template)
         {
             if (self is Func<string, string>) return (self as Func<string, string>)(template);
@@ -90,10 +90,10 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Check this object is a supported lambda types
+        /// Check this object is a supported lambda types.
         /// </summary>
-        /// <param name="self">object instance</param>
-        /// <returns>true if this is a supported lambda type otherwise false</returns>
+        /// <param name="self">The object instance.</param>
+        /// <returns><see langword="true"/> if this is a supported lambda type otherwise <see langword="false"/>.</returns>
         public static bool IsLambda(this object self)
         {
             return
@@ -104,10 +104,10 @@ namespace Mustache
         }
 
         /// <summary>
-        /// Check this object is a false like value
+        /// Check this object is a false like value.
         /// </summary>
-        /// <param name="self">object instance</param>
-        /// <returns>true if this is a false like value</returns>
+        /// <param name="self">The object instance.</param>
+        /// <returns><see langword="true"/> if this is a false like value otherwise <see langword="false"/>.</returns>
         public static bool ShouldNotRender(this object self)
         {
             if (self == null)
